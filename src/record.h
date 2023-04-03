@@ -31,7 +31,7 @@ private:
     double averageCoherence;
     int length;
     double achievementScore;
-
+    
 };
 
 #endif
