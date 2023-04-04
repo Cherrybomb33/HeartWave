@@ -5,14 +5,19 @@
 #include <QString>
 #include <QTimer>
 #include <QDateTime>
+#include <vector>
+#include <random>
+#include <time.h>
 
+
+using namespace std;
 //Session object to hold information about a new session of measurement
 class Session: public QObject {
 
     Q_OBJECT
 
     public: 
-        Session(int time, double coherenceScore, double achievementScore, int challengeLevel, int bpInterval, bool isHRContact);
+        Session(int length, double coherenceScore, double achievementScore, int challengeLevel, int bpInterval, bool isHRContact);
         ~Session();
 
         int getTime();
@@ -27,13 +32,13 @@ class Session: public QObject {
         void updateAchievementScore(double);
         void setHRContact(bool);
         void updateCoherenceLevel(QString level);
-        double calculator(*vector<double>); ???
+        double calculator(vector<double>*); //???
         void beep();
-        vector<double> simulateHeartIntervals(double time)   //generate random heart beat intervals
+        vector<double>* simulateHeartIntervals(int size);   //generate random heart beat intervals
         void updateHRVGraph();
 
     private:
-        double time;    //how long a session lasts
+        double length;    //how long a session lasts
         QTimer* timer;   //A QTimer object to keep track of the time
         double coherenceScore;
         double achievementScore;
@@ -41,5 +46,7 @@ class Session: public QObject {
         int bpInterval;   
         bool isHRContact; 
         QString coherenceLevel;
+
+        double generateRandomDouble(double min, double max);
 };
 #endif
