@@ -1,26 +1,48 @@
 #include "menu.h"
 
-Menu::Menu(QString n, QStringList list, Menu* p) {
-    name = n;
-    menuItems = list;
-    parent = p;
+//Constructor that creates a new Menu object
+Menu::Menu(QString name, QStringList menuOptions, Menu* parentMenu)
+    : name(name), menuOptions(menuOptions), parent(parentMenu)
+{
+    position = -1;
 }
 
+//Destructor that destroys the Menu object and any sub-menu objects it owns
 Menu::~Menu() {
-
-    for(int x = 0; x < subMenus.length(); x++) {
-        delete subMenus[x];
+    for (Menu* sub : subMenu) {
+        delete sub;
     }
 }
 
-//getters:
-QString Menu::getName() { return name; }
-QStringList Menu::getMenuItems() { return menuItems; }
-Menu* Menu::getParent() { return parent; }
-int Menu::getPosition() { return position; }
-Menu* Menu::get(int i) { return subMenus[i]; }
+//getters
+QString Menu::getName() {
+    return name;
+}
 
-void Menu::addChildMenu(Menu* m) {
+QStringList Menu::getMenuOptions() {
+    return menuOptions;
+}
 
-    subMenus.push_back(m);
+Menu* Menu::getParentMenu() {
+    return parentMenu;
+}
+
+int Menu::getPosition() {
+    return position;
+}
+
+//get a pointer to a submenu object at a given index in the submenu list
+Menu* Menu::get(int index) {
+    if (index < 0 || index >= subMenu.size()) {
+        return nullptr;
+    }
+    return subMenu[index];
+}
+
+//add a new submenu object to the sub-menu list of this menu object
+void Menu::addChildMenu(Menu* menu) {
+    if (menu != nullptr) {
+        menu->position = subMenu.size();
+        subMenu.push_back(menu);
+    }
 }
