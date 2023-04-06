@@ -2,10 +2,13 @@
 #define DBCONTROLLER_H
 
 #include <QString>
+#include <QStringList>
 #include <QSqlDatabase>
+#include <QSqlQuery>
 #include <QDateTime>
 #include <QDebug>
-#include <QSqlQuery>
+#include <QVariant>
+#include <QVector>
 #include <QList>
 #include <QApplication>
 
@@ -15,22 +18,23 @@ class DBController {
 public:
     DBController();  //constructor
 
-    const QString DATE_FORMAT = "yyyy-MM-dd hh:mm";   //time format in database
+    const QString DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";   //time format in database
     static const QString DATABASE_PATH;    //path of the database
-    QVector<Record*> getRecords();    //get a list of record objects
+    QStringList getHistory();    //get a list of QString
+    bool getRecord(const QDateTime& time, Record** record);   //get a Record object
 
-    bool addRecord(const QString& tableName, const QDateTime& time, const int               challengeLevel, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const int length, const double achievementScore, const vector<double>& hrvGraph);
-    bool deleteHistory(const QDateTime& time);
-    void resetDevice();    //  if isReset == true, call reset() and set isReset to false;
+    bool addRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
+    bool deleteRecord(const QDateTime& time);
+    //void resetDevice();    //  if isReset == true, call reset() and set isReset to false;
 
 private:
     QSqlDatabase heartwaveDB;    //database object
-    Setting setting;
-    bool isReset;  //initialize to false      
+    //Setting setting;
+    //bool isReset;  //initialize to false      
 
-    bool DatabaseInit();    //initializes the database
-    //??????bool isValidRecord(const QDateTime& time, const int challengeLevel, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const int length, const double achievementScore, const vector<double>& hrvGraph);
-    void reset();   //wipe all data and restore the device to the initial install condition
+    bool dbInit();    //initializes the database
+    bool isValidRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore);
+    //void reset();   //wipe all data and restore the device to the initial install condition
 
 };
 
