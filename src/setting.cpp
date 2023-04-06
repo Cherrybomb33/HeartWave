@@ -18,6 +18,6 @@ void Setting::setChallengeLevel(int challengeLevel) {
     this->challengeLevel = challengeLevel;
 }
 
-void Setting::setBreathPacer(int bpInterval) {
+void Setting::setBpInterval(int bpInterval) {
     this->bpInterval = bpInterval;
 }
