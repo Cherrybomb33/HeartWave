@@ -1,8 +1,8 @@
 #include "record.h"
 
-Record::Record(const QDateTime& time, const int challengeLevel, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const int length, const double achievementScore, const vector<double>& hrvGraph) {
+Record::Record(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const vector<QPointF>& hrvGraph) {
 
-    if (startTime.isValid()) {
+    if (time.isValid()) {
         this->startTime = time;
         this->challengeLevel = challengeLevel;
         this->lowPercentage = lowPercentage;
@@ -11,9 +11,11 @@ Record::Record(const QDateTime& time, const int challengeLevel, const double low
         this->averageCoherence = averageCoherence;
         this->length = length;
         this->achievementScore = achievementScore;
+        this->hrvGraph = hrvGraph;
     }
 }
 
+//??this function needs to show hrv graph
 QString Record::toString() {
     QString newString = 
             "Session record:\n";
