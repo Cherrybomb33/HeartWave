@@ -23,7 +23,6 @@ DBController::DBController() {
 
 //initialize heartwave database with two records
 bool DBController::dbInit() {
-
     //start a new transaction
     if (!heartwaveDB.transaction()) {
         qDebug() << "Error: Transaction failed to start:" << heartwaveDB.lastError().text();
@@ -73,7 +72,6 @@ QVector<Record*> DBController::getRecords() {
 
 //delete a record from the database and return true it the removal is successful or false otherwise.
 bool DBController::deleteRecord(const QDateTime& time) {
-
     QSqlQuery query;
     //prepare the DELETE statement
     query.prepare("DELETE FROM sessionRecords WHERE datetime = :datetime");
@@ -102,7 +100,7 @@ bool DBController::deleteRecord(const QDateTime& time) {
   achievementScore - total sum of coherence scores sampled every 5 seconds
   Returen true if the parameters are all valid and false otherwise
 */
-bool DBController::isValidRecord(const QDateTime& time, int challengeLevel, int length, doulbe lowPercentage, doulbe medPercentage, double highPercentage, double averageCoherence, double achievementScore) {
+bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel, const int length, const doulbe lowPercentage, const doulbe medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore) {
     bool isValid = true;
 
     if (!time.isValid()) {
@@ -122,8 +120,7 @@ bool DBController::isValidRecord(const QDateTime& time, int challengeLevel, int 
 }
 
 //add a session record to the database and return true if successful and false otherwise.
-bool DBController::addRecord(const QDateTime& datetime, int challengeLevel, int length, double lowPercentage, double medPercentage, double highPercentage, double averageCoherence, double achievementScore, const QVector<QPointF>& hrvGraph) {
-    
+bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph) { 
     //validate data
     if (!isValidRecord(datetime, challengeLevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore)) {
         return false;
