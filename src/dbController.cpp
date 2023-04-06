@@ -40,34 +40,90 @@ bool DBController::dbInit() {
     return heartwaveDB.commit();
 }
 
-//get a list of Record objects from the sessionRecords table in the database
-//which includes datetime, challengelevel, and length fields for each record
-QVector<Record*> DBController::getRecords() {
+//get a QStringlist of records from the sessionRecords table in the database
+//which includes datetime, challengelevel, and length fields information for each record
+QStringList DBController::getHistory() {
     QSqlQuery query;
-    QVector<Record*> history;
+    QStringList history;
 
-    //start a new transaction
-    if (!heartwaveDB.transaction()) {
-        qDebug() << "Error: Transaction failed to start:" << heartwaveDB.lastError().text();
-        return false;
+    //prepare the SELECT statement to get datetime, challengelevel, and length from sessionRecords
+    query.prepare("SELECT datetime, challengelevel, length FROM sessionRecords;");
+
+    //execute the SELECT statement
+    if (!query.exec()) {
+        qDebug() << "Error executing query:" << query.lastError().text();
+        return history;    //return an empty QStringList in case of a query execution error
     }
-
-    //prepare the SELECT statement to fetch datetime, challengelevel, and length from sessionRecords
-    query.prepare("SELECT datetime, challengelevel, length FROM sessionRecords;");
-    query.prepare("SELECT datetime, challengelevel, length FROM sessionRecords;");
-    query.exec();
 
     //iterate the results of the SELECT statement
     while (query.next()) {
-        QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);  //convert date and time value into a QDateTime object
-        int challengeLevel = query.value(1).toString().toInt();
-        int length = query.value(2).toString().toInt();
-        //create a new Record object with the fetched values
-        Record* record = new Record(datetime, challengeLevel, length);
-        //add the new Record object to the history QVector
-        history.push_back(record);
+        //get the datetime, challengelevel, and length values from the query result
+        QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);
+        int challengeLevel = query.value(1).toInt();
+        int length = query.value(2).toInt();
+
+        //format the QString
+        QString newString = datetime.toString(DATE_FORMAT) + "\n"
+            + "   Challenge Level: Level " + QString::number(challengeLevel) + "\n"
+            + "   Length: " + QString::number(length / 60)
+            + ((length % 60 < 10) ? ":0" + QString::number(length % 60) : ":" + QString::number(length % 60));
+
+        //add the QString to the history QStringList
+        history.push_back(newString);
     }
+
     return history;
+}
+
+//get the record with the specified datetime from the database. 
+//If a record is found, initialize a new Record object with the query result,
+//and store it to record output parameter and return true. 
+//If the record is not found, returns false.
+bool DBController::getRecord(const QDateTime& time, Record** record){  
+    QSqlQuery query;
+    //prepare the SELECT statement
+    query.prepare("SELECT * FROM sessionRecords WHERE datetime = :datetime");
+    query.bindValue(":datetime", time.toString("yyyy-MM-dd hh:mm:ss"));
+
+    //execute the SELECT statement
+    if (!query.exec()) {
+        qDebug() << "Error executing query:" << query.lastError().text();
+        return false;
+    }
+
+    //check if a record with the specified datetime exists
+    if (query.next()) {
+        // if the record exists, extract the values from the query result
+        QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);
+        int challengeLevel = query.value(1).toInt();
+        int length = query.value(2).toInt();
+        double lowPercentage = query.value(3).toDouble();
+        double medPercentage = query.value(4).toDouble();
+        double highPercentage = query.value(5).toDouble();
+        double averageCoherence = query.value(6).toDouble();
+        double achievementScore = query.value(7).toDouble();
+        QString hrvGraphString = query.value(8).toString();
+
+        // Convert the hrvGraphString to QVector<QPointF>
+        QVector<QPointF> hrvGraph;
+        QStringList hrvGraphStringList = hrvGraphString.split(";");
+        for (const QString& pointString : hrvGraphStringList) {
+            QStringList pointCoordinates = pointString.split(",");
+            if (pointCoordinates.size() == 2) {
+                QPointF point(pointCoordinates[0].toDouble(), pointCoordinates[1].toDouble());
+                hrvGraph.push_back(point);
+            }
+        }
+
+        // Create a new Record object with the extracted values
+        *record = new Record(datetime, challengeLevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph);
+
+        return true;
+    } else {
+        //if the record doesn't exist, return false
+        return false;
+    }
+
 }
 
 //delete a record from the database and return true it the removal is successful or false otherwise.
