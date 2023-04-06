@@ -5,18 +5,18 @@
 class Setting {
 
 public:
-    Setting(int challengeLevel, int breathPacer);    //constructor
+    //constructor
+    Setting(int challengeLevel = 0, int bpInterval = 10);    
 
     //getters and setters
     int getChallengeLevel();
-    int getBreathPacer();
+    int getBpInterval();
     void setChallengeLevel(int);
-    void setBreathPacer(int);
+    void setBpInterval(int);
 
 private:
     int challengeLevel;
-    int breathPacer;
-
+    int bpInterval;
 };
 
 #endif
