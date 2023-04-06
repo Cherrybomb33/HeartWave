@@ -2,6 +2,7 @@
 #define DBCONTROLLER_H
 
 #include <QString>
+#include <QStringList>
 #include <QSqlDatabase>
 #include <QSqlQuery>
 #include <QDateTime>
@@ -19,7 +20,8 @@ public:
 
     const QString DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";   //time format in database
     static const QString DATABASE_PATH;    //path of the database
-    QVector<Record*> getRecords();    //get a list of Record objects
+    QStringList getHistory();    //get a list of QString
+    bool getRecord(const QDateTime& time, Record** record);   //get a Record object
 
     bool addRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
     bool deleteRecord(const QDateTime& time);
