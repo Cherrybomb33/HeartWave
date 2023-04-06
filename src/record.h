@@ -4,12 +4,13 @@
 #include <QString>
 #include <QDateTime>
 #include <QTime>
+#include <QPointF>
 
 //To store information about a session in the database and in mainwindow
 class Record {
 
 public:
-    Record(const QDateTime& time, const int challengeLevel, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const int length, const double achievementScore, const vector<double>& hrvGraph);
+    Record(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const int length, const double achievementScore, const vector<QPointF>& hrvGraph);
 
     QString toString();
     QDateTime getStartTime();
@@ -20,7 +21,7 @@ public:
     double getAverageCoherence();
     int getLength();
     double getAchievementScore();
-    const vector<double>& hrvGraph;
+    const vector<QPointF>& hrvGraph;
 
 private:
     QDateTime startTime;
@@ -30,8 +31,7 @@ private:
     double highPercentage;
     double averageCoherence;
     int length;
-    double achievementScore;
-    
+    double achievementScore; 
 };
 
 #endif
