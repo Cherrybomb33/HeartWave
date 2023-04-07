@@ -21,3 +21,9 @@ void Setting::setChallengeLevel(int challengeLevel) {
 void Setting::setBpInterval(int bpInterval) {
     this->bpInterval = bpInterval;
 }
+
+//reset the configuration to the initial state
+void Setting::reset(){
+	setChallengeLevel(1);
+	setBpInterval(10);
+}
