@@ -219,3 +219,37 @@ bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel
     //commit the transaction
     return heartwaveDB.commit();
 }
+
+//reset database to the initial contidion
+bool DBController::reset() {
+    QSqlQuery query;
+
+    //start a new transaction
+    if (!heartwaveDB.transaction()) {
+        qDebug() << "Error: Transaction failed to start:" << heartwaveDB.lastError().text();
+        return false;
+    }
+
+    //delete all records from the sessionRecords table
+    query.prepare("DELETE FROM sessionRecords;");
+    if (!query.exec()) {
+        qDebug() << "Error: Failed to delete all records from sessionRecords:" << query.lastError().text();
+        heartwaveDB.rollback();
+        return false;
+    }
+
+    //commit the transaction
+    if (!heartwaveDB.commit()) {
+        qDebug() << "Error: Transaction failed to commit:" << heartwaveDB.lastError().text();
+        heartwaveDB.rollback();
+        return false;
+    }
+
+    //re-initialize the database
+    if (!initializeDatabase()) {
+        qDebug() << "Error: Re-initializing the database failed";
+        return false;
+    }
+
+    return true;
+}
