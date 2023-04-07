@@ -83,7 +83,7 @@ bool DBController::getRecord(const QDateTime& time, Record** record){
     QSqlQuery query;
     //prepare the SELECT statement
     query.prepare("SELECT * FROM sessionRecords WHERE datetime = :datetime");
-    query.bindValue(":datetime", time.toString("yyyy-MM-dd hh:mm:ss"));
+    query.bindValue(":datetime", time.toString(DATE_FORMAT));
 
     //execute the SELECT statement
     if (!query.exec()) {
@@ -133,7 +133,7 @@ bool DBController::deleteRecord(const QDateTime& time) {
     query.prepare("DELETE FROM sessionRecords WHERE datetime = :datetime");
 
     //bind the value of datetime
-    QString datetimeDelete = time.toString("yyyy-MM-dd hh:mm:ss");
+    QString datetimeDelete = time.toString(DATE_FORMAT);
     query.bindValue(":datetime", datetimeDelete);
 
     //execute the DELETE statement
@@ -199,7 +199,7 @@ bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel
     query.prepare("INSERT INTO sessionRecords (datetime, challengelevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph) VALUES (:datetime, :challengelevel, :length, :lowPercentage, :medPercentage, :highPercentage, :averageCoherence, :achievementScore, :hrvGraph)");
 
     //bind the values of involved parameters to the prepared INSERT statement
-    query.bindValue(":datetime", datetime.toString("yyyy-MM-dd hh:mm:ss"));
+    query.bindValue(":datetime", datetime.toString(DATE_FORMAT));
     query.bindValue(":challengelevel", challengeLevel);
     query.bindValue(":length", length);
     query.bindValue(":lowPercentage", lowPercentage);
