@@ -6,13 +6,16 @@ class Setting {
 
 public:
     //constructor
-    Setting(int challengeLevel = 0, int bpInterval = 10);    
+    Setting(int challengeLevel = 1, int bpInterval = 10);    
 
     //getters and setters
     int getChallengeLevel();
     int getBpInterval();
     void setChallengeLevel(int);
     void setBpInterval(int);
+    
+    //reset the configuration to the initial state
+    void reset();
 
 private:
     int challengeLevel;
