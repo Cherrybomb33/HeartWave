@@ -25,6 +25,8 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::setupConnections(){
+    // Initialize timer counter
+    currentTimerCount = -1;
 
     //set Initial sensor status
     sensorOn = false;
@@ -76,7 +78,10 @@ void MainWindow::setupConnections(){
 
     // Initialize battery levels
     ui->batteryLevelSpinBox->setValue(99.9);
-
+    
+    ui->sessionViewWidget->setVisible(false);
+    ui->sensorLabel->setVisible(false);
+    
     //Load records from the database
     allRecords = database->getHistory();
 }
@@ -114,4 +119,337 @@ void MainWindow::initializeMenu(Menu* m) {
         record->addChildMenu(new Menu("DELETE", {}, record));
         historyMenu->addChildMenu(record);
     }
+}
+
+//Disable UI for power-off, and enable the UI for power-on
+void MainWindow::changePowerStatus() {
+
+    activeQListWidget->setVisible(powerOn);
+    ui->menuLabel->setVisible(powerOn);
+    ui->statusBarQFrame->setVisible(powerOn);   //display battery level and sensor detector
+    ui->sessionView->setVisible(powerOn);
+    //ui->frequencyLabel->setVisible(powerOn);  //display sth at the bottom of the screen
+    ui->sessionViewWidget->setVisible(powerOn);
+
+    //Remove this if we want the menu to stay in the same position when the power is off
+    if (powerOn) {
+        MainWindow::navigateToMainMenu();
+        ui->sensorButton->setChecked(false);
+        activateSensor(false);
+    }
+
+    ui->upButton->setEnabled(powerOn);
+    ui->downButton->setEnabled(powerOn);
+    ui->leftButton->setEnabled(powerOn);
+    ui->rightButton->setEnabled(powerOn);
+    ui->menuButton->setEnabled(powerOn);
+    ui->selectorButton->setEnabled(powerOn);
+    ui->backButton->setEnabled(powerOn);
+    ui->sensorButton->setEnabled(powerOn);
+    ui->sensorComboBox->setEnabled(powerOn);  //control panel
+}
+
+//set power on/off state
+void MainWindow::powerSwitch() {
+    //??getBattery() not ready, should getBattery() in Setting?
+    if (getBattery() > 0) {
+        powerOn  = !powerOn;
+        changePowerStatus();
+    }
+
+    //handle poweroff event during session measurement  ??
+    if (currentTimerCount != -1) {
+        //Save Record
+        if (currentMenu->getName() == "Session") {
+            //records.last()->setDuration((currentTherapy->getTime())-currentTimerCount);
+            currentSession->saveRecord();
+            //database->addRecord(records.last()->getTreatment(),records.last()->getStartTime(),records.last()->getPowerLevel(),records.last()->getDuration());
+        }
+
+        //allRecords += records.last()->toString();
+        //Stop session
+        currentTimerCount = -1;
+        currentSession->getTimer()->stop();
+        currentSession->getTimer()->disconnect();
+        activateSensor(false);
+    }
+}
+
+
+void MainWindow::chargeBattery() {
+
+    int batteryLevel = 100.0;
+    changeBatteryLevel(batteryLevel);
+}
+
+
+void MainWindow::navigateUpMenu() {
+
+    int nextIndex = activeQListWidget->currentRow() - 1;
+
+    if (nextIndex < 0) {
+        nextIndex = activeQListWidget->count() - 1;
+    }
+
+    activeQListWidget->setCurrentRow(nextIndex);
+}
+
+
+void MainWindow::navigateDownMenu() {
+
+    int nextIndex = activeQListWidget->currentRow() + 1;
+
+    if (nextIndex > activeQListWidget->count() - 1) {
+        nextIndex = 0;
+    }
+
+    activeQListWidget->setCurrentRow(nextIndex);
+}
+
+//press selectorButton
+void MainWindow::navigateSubMenu() {
+
+    int index = activeQListWidget->currentRow();
+    if (index < 0) return;
+
+    // Prevent crash if ok button is selected in view
+    //if (currentMenu->getName() == "VIEW") {
+        //return;
+    //}
+
+    //when the menu is the reset menu.
+    if (currentMenu->getName() == "RESET") {
+        if (currentMenu->getMenuOptions()[index] == "YES") {
+            for (int i = 0; i < records.size(); i++) {
+                delete records[i];
+            }
+            records.clear();
+
+            database->reset();
+            setting->reset();
+   
+            navigateBack();
+            return;
+        }
+        else {
+            navigateBack();
+            return;
+        }
+    }
+
+    //If the menu is a parent and clicking on it should display more menus.
+    if (currentMenu->get(index)->getMenuOptions().length() > 0) {
+        currentMenu = currentMenu->get(index);
+        MainWindow::updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+
+
+    }//If the menu is not a parent and clicking on it should start a session
+    else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "START NEW SESSION") {
+        //Update new menu info
+        currentMenu = currentMenu->get(index);
+        MainWindow::updateMenu("Measuring", {});
+        MainWindow::beginSession();
+
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "VIEW") {
+        currentMenu = currentMenu->get(index);
+        MainWindow::updateMenu("Record", {});
+        MainWindow::displayRecord();
+    }
+
+    //If the button pressed should display the records.
+    else if (currentMenu->get(index)->getName() == "VIEW") {
+        QString datatime = currentMenu->getParent()->text().left(19); //get datetime Qstring
+        currentMenu = currentMenu->get(index);
+        //display the record
+        //MainWindow::updateMenu("RECORDS", allRecords);
+    }
+}
+
+void MainWindow::initializeTimer(QTimer* t) {
+
+    connect(t, &QTimer::timeout, this, &MainWindow::updateTimer);
+
+    if (sensorOn == true) {
+        t->start(1000);
+    }
+}
+
+void MainWindow::updateTimer() {
+}
+
+void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
+
+    activeQListWidget->clear();
+    activeQListWidget->addItems(menuItems);
+    activeQListWidget->setCurrentRow(0);
+
+    ui->menuLabel->setText(selectedMenuItem);
+}
+
+//??
+void MainWindow::navigateToMainMenu() {
+
+    if (currentTimerCount != -1) {
+        //Save record
+        if (currentMenu->getName() == "START NEW SESSION") {
+            records.last()->setDuration((currentSession->getTime())-currentTimerCount);
+    
+            //database->addRecord(records.last()->getTreatment(),records.last()->getStartTime(),recordings.last()->getPowerLevel(),recordings.last()->getDuration());
+        }
+
+        //allRecords += records.last()->toString();
+
+        //End session
+        currentTimerCount = -1;
+        currentSession->getTimer()->stop();
+        currentSession->getTimer()->disconnect();
+        currentSession = nullptr;
+    }
+
+    while (currentMenu->getName() != "MAIN MENU") {
+        currentMenu = currentMenu->getParent();
+    }
+
+    updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+    ui->senssionViewWidget->setVisible(false);
+    ui->sensorLabel->setVisible(false);
+}
+
+
+void MainWindow::navigateBack() {
+
+    ui->rightButton->blockSignals(true);
+    ui->leftButton->blockSignals(true);
+
+    if (currentTimerCount != -1) {
+        //Save record
+        if (currentMenu->getName() == "START NEW SESSION") {
+            records.last()->setDuration((currentSession->getTime())-currentTimerCount);
+            //db->addRecord(recordings.last()->getStartTime(),records.last()->getChallengeLevel(),recordings.last()->getDuration());
+        }
+
+        //allRecords += records.last()->toString();
+
+        //Stop session
+        currentTimerCount = -1;
+        currentSession->getTimer()->stop();
+        currentSession->getTimer()->disconnect();
+        currentSession = nullptr;
+    }
+
+    if (currentMenu->getName() == "MAIN MENU") {
+        activeQListWidget->setCurrentRow(0);
+    }
+    else {
+        currentMenu = currentMenu->getParentMenu();
+        updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+    }
+
+    ui->sessionViewWidget->setVisible(false);
+    ui->sensorLabel->setVisible(false);
+}
+
+
+void MainWindow::parameterPlus() {
+    int index = activeQListWidget->currentRow();
+    int currentChallengeLevel = setting->getChallengeLevel();
+    int currentBpInterval = setting->getBpInterval();
+
+    if (currentMenu->getName() == "SETTING"){
+        if (index == 0 && currentChallengeLevel <=3){
+            currentChallengeLevel = setting->setChallengeLevel(currentChallengeLevel + 1);
+            activeQListWidget.item(index).setText("CHALLENGE LEVEL: " + QString::number(currentChallengeLevel));
+                
+        }else if (index == 1 && currentBpInterval <=29){
+            currentBpInterval = setting->setBpInterval(currentBpInterval+1);
+            activeQListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+        }
+    }
+}
+
+
+void MainWindow::parameterMinus() {
+
+    int index = activeQListWidget->currentRow();
+    int currentChallengeLevel = setting->getChallengeLevel();
+    int currentBpInterval = setting->getBpInterval();
+
+    if (currentMenu->getName() == "SETTING"){
+        if (index == 0 && currentChallengeLevel >1){
+            currentChallengeLevel = setting->setChallengeLevel(currentChallengeLevel - 1);
+            activeQListWidget.item(index).setText("CHALLENGE LEVEL: " + QString::number(currentChallengeLevel));
+                
+        }else if (index == 1 && currentBpInterval >1){
+            currentBpInterval = setting->setBpInterval(currentBpInterval-1);
+            activeQListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+        }
+    }
+}
+
+//Slot to change the battery level from the control panel
+void MainWindow::changeBatteryLevel(double newLevel) {
+
+    if (newLevel >= 0.0 && newLevel <= 100.0) {
+        if (newLevel == 0.0 && powerOn == true) {
+            powerSwitch();
+            setBattery(0);  //should this in Setting class
+        }else{
+            setBattery(newLevel);
+        }
+
+        ui->batteryLevelSpinBox->setValue(newLevel);
+        int newLevelInt = int(newLevel);
+        ui->batteryLevelBar->setValue(newLevelInt);
+
+        QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
+        QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
+        QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
+
+        if (newLevelInt >= 50) {
+            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
+        }
+        else if (newLevelInt >= 20) {
+            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
+        }
+        else {
+            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
+        }
+    }
+}
+
+//Starts/stops the session timer if they are on a session
+void MainWindow::activateSensor(bool checked) {
+
+    ui->sensorLabel->setPixmap(QPixmap(checked ? ":/icons/sensorOn.svg" : ":/icons/sensorOff.svg"));
+    ui->sensorComboBox->setCurrentIndex(checked ? 1 : 0);
+    sensorOn = checked;
+
+    if (currentTimerCount != -1) {
+        if (!sensorOn) {
+            currentSession->getTimer()->stop();
+        }
+        else {
+            currentSession->getTimer()->start(1000);
+        }
+    }
+}
+
+void MainWindow::activateSensor(int value) {
+
+    ui->sensorButton->setChecked(value == 1);
+    activateSensor(value == 1);
+}
+
+void MainWindow::drainBattery() {
+
+    //1000 constant because 15 minutes is the longest therapy and we feel as it should last at least 15 minutes at full power
+    double batteryLevel = qMax(getBattery() - getBattery/1000.0, 0.0);
+
+    changeBatteryLevel(batteryLevel);
+}
+
+void MainWindow::changeChallengeLevel(int level) {
+
+    setting->setChallengeLevel(level);
+    ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
 }
