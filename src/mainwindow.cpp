@@ -458,36 +458,36 @@ void MainWindow::plot(QVector<QPointF>** points) {
     int size = (*points)->size();
     QVector<double> x(size), y(size);
     for (int i=0; i<size; i++) {
-      x[i] = (*points)->at(i).x() + previous;
+      x[i] = (*points)->at(i).x() + previousX;
       y[i] = (*points)->at(i).y();
-      previous = x[i];
+      previousX = x[i];
       qInfo() << x[i] << "|" << y[i];
     }
-    ui->testGraph->QCustomPlot::addGraph();
-    ui->testGraph->graph(0)->setData(x, y);
-    ui->testGraph->xAxis->setLabel("Time");
-    ui->testGraph->yAxis->setLabel("HR");
-    ui->testGraph->xAxis->setRange(0, 124);
-    ui->testGraph->yAxis->setRange(55, 105);
-    ui->testGraph->replot();
+    ui->hrvGraph->QCustomPlot::addGraph();
+    ui->hrvGraph->graph(0)->setData(x, y);
+    ui->hrvGraph->xAxis->setLabel("Time");
+    ui->hrvGraph->yAxis->setLabel("HR");
+    ui->hrvGraph->xAxis->setRange(0, 124);
+    ui->hrvGraph->yAxis->setRange(55, 105);
+    ui->hrvGraph->replot();
 }
 
 void MainWindow::addPlot(QVector<QPointF>** points) {
     int size = (*points)->size();
     QVector<double> x(size), y(size);
     for (int i=0; i<size; i++) {
-      x[i] = (*points)->at(i).x() + previous;
+      x[i] = (*points)->at(i).x() + previousX;
       y[i] = (*points)->at(i).y();
-      previous = x[i];
+      previousX = x[i];
       qInfo()<< "????" << x[i] << "|" << y[i];
     }
-    ui->testGraph->graph(0)->addData(x,y);
-    ui->testGraph->replot();
+    ui->hrvGraph->graph(0)->addData(x,y);
+    ui->hrvGraph->replot();
 }
 
 void MainWindow::another5Sec()
 {
-    QVector<double>* points = simulateHeartIntervals(5);
+    QVector<double>* points = currentSession->simulateHeartIntervals(5);
     QVector<QPointF>* tests = calPoints(&points);
     addPlot(&tests);
 }

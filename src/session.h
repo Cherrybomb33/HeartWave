@@ -8,6 +8,7 @@
 #include <vector>
 #include <random>
 #include <time.h>
+#include <QPointF>
 
 
 using namespace std;
@@ -17,12 +18,11 @@ class Session: public QObject {
     Q_OBJECT
 
     public: 
-        Session(int length, double coherenceScore, double achievementScore, bool isHRContact);
+        Session();
         ~Session();
 
         double getLength();
         void setLength(double length);
-        QTimer* getTimer(); 
         double getCoherenceScore();  
         void setAchievementScore(double achievementScore);
         double getAchievementScore();  
@@ -40,9 +40,9 @@ class Session: public QObject {
         double getHighPercentage();
         void updateHRVData(QVector<QPointF>* newData);
 
-    private:
+
+private:
         double length;    //how long a session lasts
-        QTimer* timer;   //A QTimer object to keep track of the time
         double coherenceScore;
         double achievementScore;
         bool isHRContact; 
