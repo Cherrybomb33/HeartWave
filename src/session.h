@@ -17,7 +17,7 @@ class Session: public QObject {
     Q_OBJECT
 
     public: 
-        Session(int length, double coherenceScore, double achievementScore, int challengeLevel, int bpInterval, bool isHRContact);
+        Session(int length, double coherenceScore, double achievementScore, bool isHRContact);
         ~Session();
 
         double getLength();
@@ -26,17 +26,14 @@ class Session: public QObject {
         double getCoherenceScore();  
         void setAchievementScore(double achievementScore);
         double getAchievementScore();  
-        //int getChallengeLevel();
-        int getBPInterval();    //how to implement breath pacer?
         bool isHRContactOn();
-        QString getCoherenceLevel();
-        void updateCoherenceScore(double);
+        int getCoherenceLevel(); //1 is low, 2 is medium, 3 is high
+        void updateCoherenceScore();
         void updateAchievementScore(double);
         void setHRContact(bool);
-        void updateCoherenceLevel(QString level);
+        void updateCoherenceLevel();
         void beep();
         QVector<double>* simulateHeartIntervals(double timeLimit);   //generate random heart beat intervals up to the limit
-        void updateHRVGraph();
         void calCLPercentage();  //eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
         double getLowPercentage();
         double getmediumPercentage();
@@ -48,10 +45,8 @@ class Session: public QObject {
         QTimer* timer;   //A QTimer object to keep track of the time
         double coherenceScore;
         double achievementScore;
-//        int challengeLevel;
-//        int bpInterval;
         bool isHRContact; 
-        int coherenceLevel; //0-1 is low, 1-2 is medium, >3 is high
+        int coherenceLevel; //0-1 score is low(0), 1-2 score is medium(1), >=2 is high(2)
         int lowCount;
         int mediumCount;
         int highCount;
