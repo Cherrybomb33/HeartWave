@@ -1,5 +1,13 @@
-<!DOCTYPE RCC><RCC version="1.0">
-<qresource>
-    <file>res/check.png</file>
-</qresource>
+<RCC>
+    <qresource prefix="/">
+        <file>check.png</file>
+        <file>back.png</file>
+        <file>down.png</file>
+        <file>left.png</file>
+        <file>menu.png</file>
+        <file>right.png</file>
+        <file>up.png</file>
+        <file>power.png</file>
+        <file>select.png</file>
+    </qresource>
 </RCC>
