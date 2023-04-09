@@ -36,7 +36,7 @@ class Session: public QObject {
         void updateCoherenceLevel(QString level);
         double calculator(vector<double>*); //???
         void beep();
-        vector<double>* simulateHeartIntervals(int size);   //generate random heart beat intervals
+        QVector<double>* simulateHeartIntervals(double timeLimit);   //generate random heart beat intervals up to the limit
         void updateHRVGraph();
         void calCLPercentage();
         double getLowPercentage();

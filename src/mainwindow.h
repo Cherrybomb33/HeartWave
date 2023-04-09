@@ -8,6 +8,7 @@
 #include <QTime>
 #include <QStatusBar>
 #include <QVector>
+#include <QPointF>
 #include <QtGlobal>
 
 #include "menu.h"
@@ -26,6 +27,10 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
+
+    void plot(QVector<QPointF> **points); //Plot the HRV graph based on points parameter
+    void addPlot(QVector<QPointF> **points);//Add more points to the HRV graph based on points parameter
+    void initBP(QTimer* timer);//Initialize the breath pacer with a QTimer
 
 private:
     Menu* currentMenu;  //the current node of the menu tree that the user is on
@@ -47,6 +52,7 @@ private:
     bool sensorOn;
     int currentBattery;
     int currentTimerCount;
+    double previousX;
 
     QString timeString; //a string representation of how long the session runs
     
@@ -59,6 +65,7 @@ private:
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
     void drainBattery();  //Contains an equation of how much to drain the battery by then calling another function to change it
 
+    QVector<QPointF>* calPoints(QVector<double>** times);
 
 private slots:
     void updateTimer();  //Update the timer displayed on the session screen
@@ -75,6 +82,8 @@ private slots:
     
     void activateSensor(bool);   //Start/stop the session timer if they are on a measurement session
     void activateSensor(int);  //Start/stop the session from the admin panel
+
+    void another5Sec(); //Generato another 5 seconds data and add it to the plot
 
 };
 
