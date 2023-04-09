@@ -15,17 +15,15 @@ Session::Session(int length, double coherenceScore, double achievementScore, int
     connect(timer, SIGNAL(timeout()), this, SLOT(updateCoherenceScore()));
 
     // initialize the HRV graph with empty data
-    for (int i = 0; i < 64; i++) {
-        this->hrvData.push_back(0);
-    }
+    hrvData = new QVector<QPointF>();
 }
 
 Session::~Session() {
     delete this->timer;
 }
 
-int Session::getTime() {
-    return this->time.elapsed();
+QTimer* Session::getTime() {
+    return this->timer;
 }
 
 QTimer* Session::getTimer() {
@@ -78,6 +76,8 @@ void Session::updateCoherenceScore() {
         // make a beep sound
         this->beep();
     }
+
+    //update coherence level
 }
 
 void Session::updateCoherenceScore(double newCoherenceScore) {
