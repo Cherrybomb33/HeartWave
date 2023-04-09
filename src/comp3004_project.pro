@@ -21,6 +21,7 @@ SOURCES += \
     main.cpp \
     mainwindow.cpp \
     menu.cpp \
+    qcustomplot.cpp \
     record.cpp \
     session.cpp \
     setting.cpp
@@ -30,6 +31,7 @@ HEADERS += \
     dbController.h \
     mainwindow.h \
     menu.h \
+    qcustomplot.h \
     record.h \
     session.h \
     setting.h

@@ -1,4 +1,4 @@
-#include "mainWindow.h"
+#include "mainwindow.h"
 
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
@@ -452,4 +452,73 @@ void MainWindow::changeChallengeLevel(int level) {
 
     setting->setChallengeLevel(level);
     ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
+}
+
+void MainWindow::plot(QVector<QPointF>** points) {
+    int size = (*points)->size();
+    QVector<double> x(size), y(size);
+    for (int i=0; i<size; i++) {
+      x[i] = (*points)->at(i).x() + previous;
+      y[i] = (*points)->at(i).y();
+      previous = x[i];
+      qInfo() << x[i] << "|" << y[i];
+    }
+    ui->testGraph->QCustomPlot::addGraph();
+    ui->testGraph->graph(0)->setData(x, y);
+    ui->testGraph->xAxis->setLabel("Time");
+    ui->testGraph->yAxis->setLabel("HR");
+    ui->testGraph->xAxis->setRange(0, 124);
+    ui->testGraph->yAxis->setRange(55, 105);
+    ui->testGraph->replot();
+}
+
+void MainWindow::addPlot(QVector<QPointF>** points) {
+    int size = (*points)->size();
+    QVector<double> x(size), y(size);
+    for (int i=0; i<size; i++) {
+      x[i] = (*points)->at(i).x() + previous;
+      y[i] = (*points)->at(i).y();
+      previous = x[i];
+      qInfo()<< "????" << x[i] << "|" << y[i];
+    }
+    ui->testGraph->graph(0)->addData(x,y);
+    ui->testGraph->replot();
+}
+
+void MainWindow::another5Sec()
+{
+    QVector<double>* points = simulateHeartIntervals(5);
+    QVector<QPointF>* tests = calPoints(&points);
+    addPlot(&tests);
+}
+
+void MainWindow::initBP(QTimer* timer) {
+    int progress = 0;
+    bool isIncreasing = true;
+
+    connect(timer, &QTimer::timeout,[this,&progress, &isIncreasing]() {
+        if (isIncreasing) {
+            progress += 20; // change this value to control the speed of progress change
+            if (progress >= 100) {
+                isIncreasing = false;
+            }
+        } else {
+            progress -= 20; // change this value to control the speed of progress change
+            if (progress <= 0) {
+                isIncreasing = true;
+            }
+        }
+        ui->bp->setValue(progress);
+    });
+
+    timer->start(1000);
+}
+
+QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {
+    QVector<QPointF>* points = new QVector<QPointF>();
+    for (int i = 0;i < (*times)->size();i++) {
+        QPointF newPoint((*times)->at(i),60/(*times)->at(i));
+        points->push_back(newPoint);
+    }
+    return points;
 }
