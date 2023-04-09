@@ -13,9 +13,10 @@
 #include <QtWidgets/QApplication>
 #include <QtWidgets/QMainWindow>
 #include <QtWidgets/QMenuBar>
-#include <QtWidgets/QPushButton>
+#include <QtWidgets/QProgressBar>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -23,7 +24,8 @@ class Ui_MainWindow
 {
 public:
     QWidget *centralwidget;
-    QPushButton *pushButton;
+    QProgressBar *bp;
+    QCustomPlot *hrvGraph;
     QMenuBar *menubar;
     QStatusBar *statusbar;
 
@@ -34,9 +36,13 @@ public:
         MainWindow->resize(800, 600);
         centralwidget = new QWidget(MainWindow);
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-        pushButton = new QPushButton(centralwidget);
-        pushButton->setObjectName(QString::fromUtf8("pushButton"));
-        pushButton->setGeometry(QRect(310, 140, 80, 25));
+        bp = new QProgressBar(centralwidget);
+        bp->setObjectName(QString::fromUtf8("bp"));
+        bp->setGeometry(QRect(270, 290, 231, 23));
+        bp->setValue(0);
+        hrvGraph = new QCustomPlot(centralwidget);
+        hrvGraph->setObjectName(QString::fromUtf8("hrvGraph"));
+        hrvGraph->setGeometry(QRect(130, 30, 511, 251));
         MainWindow->setCentralWidget(centralwidget);
         menubar = new QMenuBar(MainWindow);
         menubar->setObjectName(QString::fromUtf8("menubar"));
@@ -54,7 +60,6 @@ public:
     void retranslateUi(QMainWindow *MainWindow)
     {
         MainWindow->setWindowTitle(QApplication::translate("MainWindow", "MainWindow", nullptr));
-        pushButton->setText(QApplication::translate("MainWindow", "PushButton", nullptr));
     } // retranslateUi
 
 };

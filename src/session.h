@@ -26,7 +26,7 @@ class Session: public QObject {
         double getCoherenceScore();  
         void setAchievementScore(double achievementScore);
         double getAchievementScore();  
-        int getChallengeLevel();
+        //int getChallengeLevel();
         int getBPInterval();    //how to implement breath pacer?
         bool isHRContactOn();
         QString getCoherenceLevel();
@@ -34,12 +34,13 @@ class Session: public QObject {
         void updateAchievementScore(double);
         void setHRContact(bool);
         void updateCoherenceLevel(QString level);
-        double calculator(vector<double>*); //???
         void beep();
         QVector<double>* simulateHeartIntervals(double timeLimit);   //generate random heart beat intervals up to the limit
         void updateHRVGraph();
-        void calCLPercentage();
+        void calCLPercentage();  //eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
         double getLowPercentage();
+        double getmediumPercentage();
+        double getHighPercentage();
         void updateHRVData(QVector<QPointF>* newData);
 
     private:
@@ -50,11 +51,13 @@ class Session: public QObject {
 //        int challengeLevel;
 //        int bpInterval;
         bool isHRContact; 
-        int coherenceLevel; //0 is low, 1 is medium, 2 is high
+        int coherenceLevel; //0-1 is low, 1-2 is medium, >3 is high
         int lowCount;
         int mediumCount;
-        int hightCount;
+        int highCount;
         double lowPercentage;
+        double mediumPercentage;
+        double highPercentage;
         QVector<QPointF>* hrvData;
 
         double generateRandomDouble(double min, double max);

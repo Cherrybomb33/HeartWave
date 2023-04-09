@@ -8,26 +8,38 @@ Session::Session(int length, double coherenceScore, double achievementScore, int
     this->challengeLevel = challengeLevel;
     this->bpInterval = bpInterval;
     this->isHRContact = isHRContact;
-    this->coherenceLevel = "Low";
-    
+    this->coherenceLevel = 0;
+    this->lowCount = 0;
+    this->mediumCount = 0;
+    this->highCount = 0;
+    this->lowPercentage = 0.0;
+    this->mediumPercentage = 0.0;
+    this->hjghPercentage = 0.0;
+
     // create the timer and connect it to the updateCoherenceScore slot
     this->timer = new QTimer(this);
-    connect(timer, SIGNAL(timeout()), this, SLOT(updateCoherenceScore()));
+    connect(timer, SIGNAL(timeout()), this, SLOT(beep()));
+    timer->start(1000); //Start the timer for 1 second interval
 
     // initialize the HRV graph with empty data
-    hrvData = new QVector<QPointF>();
+    this->hrvData = new QVector<QPointF>();
 }
 
 Session::~Session() {
     delete this->timer;
-}
-
-QTimer* Session::getTime() {
-    return this->timer;
+    delete this->hrvData;
 }
 
 QTimer* Session::getTimer() {
     return this->timer;
+}
+
+double Session::getLength() {
+    return this->length;
+}
+
+void Session::setLength(double len) {
+    this->length = lenth;
 }
 
 double Session::getCoherenceScore() {
@@ -38,9 +50,9 @@ double Session::getAchievementScore() {
     return this->achievementScore;
 }
 
-int Session::getChallengeLevel() {
-    return this->challengeLevel;
-}
+//int Session::getChallengeLevel() {
+//    return this->challengeLevel;
+//}
 
 int Session::getBPInterval() {
     return this->bpInterval;
@@ -50,55 +62,64 @@ bool Session::isHRContactOn() {
     return this->isHRContact;
 }
 
+// ?????????
 QString Session::getCoherenceLevel() {
-    return this->coherenceLevel;
+    if (coherenceLevel < 1) {
+        return "Low";
+    } else if (coherenceLevel >= 1 && coherenceLevel < 2) {
+        return "Medium";
+    } else {
+        return "High";
+    }
 }
 
-void Session::updateCoherenceScore() {
-    // get the last 64 HRV data points
-    vector<double> hrvData = this->hrvData.mid(this->hrvData.size() - 64, 64);
-
-    // calculate the coherence score
-    double newCoherenceScore = this->calculator(&hrvData);
-
-    // update the coherence score
-    this->updateCoherenceScore(newCoherenceScore);
-
-    // update the HRV graph
-    this->updateHRVGraph();
-
-    // check if the coherence level has changed
-    QString newCoherenceLevel = this->getCoherenceLevel();
-    if (newCoherenceLevel != this->coherenceLevel) {
-        // update the coherence level
-        this->updateCoherenceLevel(newCoherenceLevel);
-
-        // make a beep sound
-        this->beep();
+void Session::updateCoherenceLevel(QString level) {
+    if (level == "Low") {
+        coherenceLevel = 0;
+    } else if (level == "Medium") {
+        coherenceLevel = 1;
+    } else {
+        coherenceLevel = 2;
     }
-
-    //update coherence level
 }
 
 void Session::updateCoherenceScore(double newCoherenceScore) {
     this->coherenceScore = newCoherenceScore;
-    this->achievementScore += newCoherenceScore;
+    if (newCoherenceScore < 1) {
+        lowCount++;
+    } else if (newCoherenceScore >= 1 && newCoherenceScore < 2) {
+        mediumCount++;
+    } else {
+        highCount++;
+    }
+    updateAchievementScore(newCoherenceSocre);
 }
 
+void Session::calCLPercentage() {
+    int totalCount = lowCount + mediumCount + highCount;
+    if (totalCount != 0) {
+        lowPercentage = lowCount / (double)totalCount;
+        mediumPercentage = mediumCount / (double)totalCount;
+        highPercentage = highCount / (double)totalCount;
+}
+
+double Session::getLowPercentage() {
+    return lowPercentage;
+}
+
+double Session::getmediumPercentage() {
+    return mediumPercentage;
+}
+
+double Session::getHighPercentage() {
+    return highPercentage;
+}
 void Session::updateAchievementScore(double value) {
     achievementScore += value;
 }
 
 void Session::setHRContact(bool value) {
     isHRContact = value;
-}
-
-void Session::updateCoherenceLevel(QString level) {
-    coherenceLevel = level;
-}
-
-double Session::calculator(vector<double>* intervals) {
-    
 }
 
 void Session::beep() {
