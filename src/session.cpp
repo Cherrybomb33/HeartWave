@@ -1,7 +1,7 @@
 #include "session.h"
 #include <QDebug>
 
-Session::Session(int length, double coherenceScore, double achievementScore, int challengeLevel, bool isHRContact) {
+Session::Session(int length, double coherenceScore, double achievementScore, bool isHRContact) {
     this->length = length;
     this->coherenceScore = coherenceScore;
     this->achievementScore = achievementScore;
@@ -37,8 +37,8 @@ double Session::getLength() {
     return this->length;
 }
 
-void Session::setLength(double len) {
-    this->length = lenth;
+void Session::setLength(double length) {
+    this->length = length;
 }
 
 double Session::getCoherenceScore() {
