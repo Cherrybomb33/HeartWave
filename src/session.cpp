@@ -1,6 +1,7 @@
 #include "session.h"
 #include <QDebug>
 
+// constructor to create a new session object
 Session::Session() {
     this->length = 0;
     this->coherenceScore = 0;
@@ -17,95 +18,59 @@ Session::Session() {
     this->hrvData = new QVector<QPointF>();
 }
 
+// destructor to clean up memory used by the session object
 Session::~Session() {
     delete this->hrvData;
 }
 
+// getter function to return the length of the session
 double Session::getLength() {
     return this->length;
 }
 
-void Session::setLength(double length) {
-    this->length = length;
-}
-
+// getter function to return the coherence score
 double Session::getCoherenceScore() {
     return this->coherenceScore;
 }
 
+// getter function to return the achievement score of the session
 double Session::getAchievementScore() {
     return this->achievementScore;
 }
 
-bool Session::isHRContactOn() {
-    return this->isHRContact;
-}
-
+// 1 is low, 2 is medium, 3 is high
 int Session::getCoherenceLevel() {
     return coherenceLevel;
 }
 
-void Session::updateCoherenceLevel() {
-    if (this->coherenceScore < 1) {
-        coherenceLevel = 0;
-    } else if (this->coherenceScore >= 1 && this->coherenceScore < 2) {
-        coherenceLevel = 1;
-    } else {
-        coherenceLevel = 2;
-    }
-}
-
-void Session::updateCoherenceScore() {
-    this->coherenceScore = generateRandomDouble(0,3);
-    if (this->coherenceScore < 1) {
-        lowCount++;
-    } else if (this->coherenceScore >= 1 && this->coherenceScore < 2) {
-        mediumCount++;
-    } else {
-        highCount++;
-    }
-    updateAchievementScore(this->coherenceScore);
-}
-
-void Session::updateAchievementScore(double value) {
-    achievementScore += value;
-}
-
-void Session::calCLPercentage() {
-    int totalCount = lowCount + mediumCount + highCount;
-    if (totalCount != 0) {
-        lowPercentage = lowCount / (double)totalCount;
-        mediumPercentage = mediumCount / (double)totalCount;
-        highPercentage = highCount / (double)totalCount;
-    }
-}
-
+// getter function to return the percentage of low coherence levels
 double Session::getLowPercentage() {
     return lowPercentage;
 }
 
+// getter function to return the percentage of medium coherence levels
 double Session::getmediumPercentage() {
     return mediumPercentage;
 }
 
+// getter function to return the percentage of high coherence levels
 double Session::getHighPercentage() {
     return highPercentage;
 }
 
+// setter function to set the length of the session
+void Session::setLength(double length) {
+    this->length = length;
+}
+
+// setter function to set the achievement score of the session
+void Session::setAchievementScore(double ach) {
+    this->achievementScore = ach;
+}
+
+// setter function to set whether HR contact is on
 void Session::setHRContact(bool value) {
     isHRContact = value;
-}
-
-void Session::beep() {
-    // implement the beep sound
-    qDebug() << "beep";
-}
-
-// append newData into hrvData.
-void Session::updateHRVData(QVector<QPointF>* newData) {
-    for (auto it = newData->begin(); it != newData->end();++it) {
-        this->hrvData->append(*it);
-    }
 }
 
 // This function generates random heartbeat intervals as the original data for the program
@@ -135,6 +100,63 @@ QVector<double>* Session::simulateHeartIntervals(double timeLimit) {
         curTotal += randomNum;
     }
     return heartIntervals;
+}
+
+// calculate percentage of time in different coherence levels. eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
+void Session::calCLPercentage() {
+    int totalCount = lowCount + mediumCount + highCount;
+    if (totalCount != 0) {
+        lowPercentage = lowCount / (double)totalCount;
+        mediumPercentage = mediumCount / (double)totalCount;
+        highPercentage = highCount / (double)totalCount;
+    }
+}
+
+// function to update the coherence score of the session
+void Session::updateCoherenceScore() {
+    this->coherenceScore = generateRandomDouble(0,3);
+    if (this->coherenceScore < 1) {
+        lowCount++;
+    } else if (this->coherenceScore >= 1 && this->coherenceScore < 2) {
+        mediumCount++;
+    } else {
+        highCount++;
+    }
+    updateAchievementScore(this->coherenceScore);
+}
+
+// function to update the achievement score of the session
+void Session::updateAchievementScore(double value) {
+    setAchievementScore(getAchievementScore() + value);
+}
+
+//function to update the coherence level of the session
+void Session::updateCoherenceLevel() {
+    if (this->coherenceScore < 1) {
+        coherenceLevel = 0;
+    } else if (this->coherenceScore >= 1 && this->coherenceScore < 2) {
+        coherenceLevel = 1;
+    } else {
+        coherenceLevel = 2;
+    }
+}
+
+// function to update the HRV data of the session (append newData into hrvData)
+void Session::updateHRVData(QVector<QPointF>* newData) {
+    for (auto it = newData->begin(); it != newData->end();++it) {
+        this->hrvData->append(*it);
+    }
+}
+
+// to check if HR contact is on
+bool Session::isHRContactOn() {
+    return this->isHRContact;
+}
+
+// function to emit a beep signal
+void Session::beep() {
+    // implement the beep sound
+    qDebug() << "beep";
 }
 
 // This is used for generate random double for the simulateHeartIntervals(int size) function
