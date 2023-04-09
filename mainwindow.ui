@@ -55,7 +55,7 @@
     <property name="frameShadow">
      <enum>QFrame::Raised</enum>
     </property>
-    <widget class="QProgressBar" name="progressBar">
+    <widget class="QProgressBar" name="battery">
      <property name="geometry">
       <rect>
        <x>10</x>
@@ -68,7 +68,7 @@
       <number>100</number>
      </property>
     </widget>
-    <widget class="QLabel" name="label">
+    <widget class="QLabel" name="contact">
      <property name="geometry">
       <rect>
        <x>570</x>
@@ -287,6 +287,60 @@ QPushButton:pressed {
 
 QPushButton:pressed {
 	background-color: rgb(85, 87, 83);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="lowLabel">
+    <property name="geometry">
+     <rect>
+      <x>130</x>
+      <y>10</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+background-color:rgb(239, 41, 41);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="medLabel">
+    <property name="geometry">
+     <rect>
+      <x>250</x>
+      <y>10</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	background-color: rgb(52, 101, 164);
+}</string>
+    </property>
+    <property name="text">
+     <string/>
+    </property>
+   </widget>
+   <widget class="QLabel" name="highLabel">
+    <property name="geometry">
+     <rect>
+      <x>370</x>
+      <y>10</y>
+      <width>91</width>
+      <height>21</height>
+     </rect>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">QLabel{
+	background-color: rgb(78, 154, 6);
 }</string>
     </property>
     <property name="text">
