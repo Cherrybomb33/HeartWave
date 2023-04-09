@@ -15,26 +15,29 @@ DEFINES += QT_DEPRECATED_WARNINGS
 # You can also select to disable deprecated APIs only up to a certain version of Qt.
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
+source_dir = src
+res_dir = res
+
 SOURCES += \
-    breath_pacer.cpp \
-    dbController.cpp \
-    main.cpp \
-    mainwindow.cpp \
-    menu.cpp \
-    qcustomplot.cpp \
-    record.cpp \
-    session.cpp \
-    setting.cpp
+    $${source_dir}/breath_pacer.cpp \
+    $${source_dir}/dbController.cpp \
+    $${source_dir}/main.cpp \
+    $${source_dir}/mainwindow.cpp \
+    $${source_dir}/menu.cpp \
+    $${source_dir}/qcustomplot.cpp \
+    $${source_dir}/record.cpp \
+    $${source_dir}/session.cpp \
+    $${source_dir}/setting.cpp
 
 HEADERS += \
-    breath_pacer.h \
-    dbController.h \
-    mainwindow.h \
-    menu.h \
-    qcustomplot.h \
-    record.h \
-    session.h \
-    setting.h
+    $${source_dir}/breath_pacer.h \
+    $${source_dir}/dbController.h \
+    $${source_dir}/mainwindow.h \
+    $${source_dir}/menu.h \
+    $${source_dir}/qcustomplot.h \
+    $${source_dir}/record.h \
+    $${source_dir}/session.h \
+    $${source_dir}/setting.h
 
 FORMS += \
     mainwindow.ui
@@ -43,3 +46,8 @@ FORMS += \
 qnx: target.path = /tmp/$${TARGET}/bin
 else: unix:!android: target.path = /opt/$${TARGET}/bin
 !isEmpty(target.path): INSTALLS += target
+
+DISTFILES +=
+
+RESOURCES += \
+    ../res/res.qrc
