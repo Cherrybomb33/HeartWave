@@ -32,7 +32,6 @@ public:
 
 //    void plot(QVector<QPointF> **points); //Plot the HRV graph based on points parameter
 //    void addPlot(QVector<QPointF> **points);//Add more points to the HRV graph based on points parameter
-//    void initBP(QTimer* timer);//Initialize the breath pacer with a QTimer
 
 private:
     Menu* currentMenu;  //the current node of the menu tree that the user is on
@@ -52,8 +51,10 @@ private:
 
     bool powerOn;
     bool sensorOn;
-    int currentBattery;
+    double currentBattery;
     int currentTimerCount;
+    int bpProgress;
+    bool bpIsIncreasing;
 
     QString timeString; //a string representation of how long the session runs
     
@@ -64,11 +65,16 @@ private:
     //void initializeTimer(QTimer*);   //Initalize the timer
     void startSession();  //Display the session page, and initialize data to run the session if user click the sensorOn button
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
-    void drainBattery();  //Contains an equation of how much to drain the battery by then calling another function to change it
+    void consumeBattery(double consumption);  //Contains an equation of how much to drain the battery by then calling another function to change it
 
 //    QVector<QPointF>* calPoints(QVector<double>** times);
-
+    void updateSession();
+    void plot();
     void displayReview(Record *newRecord);
+    void updateBP(int interval);
+    void endSession();
+    void updateSessionView();
+    void changeBatteryCapacity(double capacity);
 private slots:
     void powerSwitch();   //set power on/off state
     void rechargeBattery();  //Change the currentPowerLevel to 100
@@ -84,11 +90,8 @@ private slots:
     void activateSensor(bool);   //Start/stop the session timer if they are on a measurement session
     void activateSensor(int);  //Start/stop the session from the admin panel
 
-    void plot();
-
 //    void another5Sec(); //Generato another 5 seconds data and add it to the plot
-
-    void updateSession();
+    void sessionTimerSlot();
 };
 
 #endif

@@ -21,6 +21,7 @@ Session::Session() {
 
 // destructor to clean up memory used by the session object
 Session::~Session() {
+    delete hrvData;
     delete timer;
 }
 
