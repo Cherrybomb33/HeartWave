@@ -109,7 +109,7 @@ void MainWindow::initializeMenu(Menu* m) {
     Menu* resetMenu = new Menu("RESET", {"YES","NO"}, settingMenu);
     settingMenu->addChildMenu(resetMenu);
 
-    historyMenu->addChildMenu(new Menu(,{}));
+    //historyMenu->addChildMenu(new Menu(,{}));
     
     //create menus and submenus for each record in historyMenu
     for (const QString &str : historyList) {
@@ -258,7 +258,7 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     else if (currentMenu->get(index)->getName() == "VIEW") {
-        QString datatime = currentMenu->getParent()->text().left(19); //get datetime Qstring
+        QString datatime = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
         currentMenu = currentMenu->get(index);
         //display the record
         //MainWindow::updateMenu("RECORDS", allRecords);
@@ -307,7 +307,7 @@ void MainWindow::navigateToMainMenu() {
     }
 
     while (currentMenu->getName() != "MAIN MENU") {
-        currentMenu = currentMenu->getParent();
+        currentMenu = currentMenu->getParentMenu();
     }
 
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
@@ -420,7 +420,7 @@ void MainWindow::changeBatteryLevel(double newLevel) {
 //Starts/stops the session timer if they are on a session
 void MainWindow::activateSensor(bool checked) {
 
-    ui->sensorLabel->setPixmap(QPixmap(checked ? ":/icons/sensorOn.svg" : ":/icons/sensorOff.svg"));
+    //ui->sensorLabel->setPixmap(QPixmap(checked ? ":/icons/sensorOn.svg" : ":/icons/sensorOff.svg"));
     ui->sensorComboBox->setCurrentIndex(checked ? 1 : 0);
     sensorOn = checked;
 
