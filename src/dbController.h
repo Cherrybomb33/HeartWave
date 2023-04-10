@@ -3,15 +3,19 @@
 
 #include <QString>
 #include <QStringList>
-#include <QSqlDatabase>
-#include <QSqlQuery>
+#include <QtSql/QSqlDatabase>
+#include <QtSql/QSqlQuery>
+#include <QtSql/QSqlError>
 #include <QDateTime>
 #include <QDebug>
 #include <QVariant>
 #include <QVector>
-#include <QVPointF>
+#include <QPointF>
 #include <QList>
 #include <QApplication>
+#include <QPropertyAnimation>
+#include "record.h"
+
 
 //Manages interactions between application and database
 class DBController {

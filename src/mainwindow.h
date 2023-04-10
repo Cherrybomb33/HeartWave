@@ -45,7 +45,7 @@ private:
     QStringList allRecords;  //A list of strings where each string is a string representation of a record object
 
     Session* currentSession;  //A pointer for the current running measurement session
-    DBManager* database;
+    DBController* database;
     Setting* setting;
 
     bool powerOn;

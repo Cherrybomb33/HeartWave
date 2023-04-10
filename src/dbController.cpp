@@ -156,7 +156,7 @@ bool DBController::deleteRecord(const QDateTime& time) {
   achievementScore - total sum of coherence scores sampled every 5 seconds
   Returen true if the parameters are all valid and false otherwise
 */
-bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel, const int length, const doulbe lowPercentage, const doulbe medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore) {
+bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore) {
     bool isValid = true;
 
     if (!time.isValid()) {
@@ -172,7 +172,7 @@ bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel
         qDebug() << "Error: Database cannot add record, lowPercentage/medPercentage/highPercentage/averageCoherence/achievementScore is not valid";
         isValid = false;
     }
-    return valid;
+    return isValid;
 }
 
 //add a session record to the database and return true if successful and false otherwise.
@@ -187,6 +187,8 @@ bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel
         qDebug() << "Error: Transaction failed to start:" << heartwaveDB.lastError().text();
         return false;
     }
+
+    QSqlQuery query;
 
     //convert QVector<QPointF> to a QString
     QStringList hrvGraphStringList;
@@ -246,7 +248,7 @@ bool DBController::reset() {
     }
 
     //re-initialize the database
-    if (!initializeDatabase()) {
+    if (!dbInit()) {
         qDebug() << "Error: Re-initializing the database failed";
         return false;
     }
