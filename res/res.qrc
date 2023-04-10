@@ -9,5 +9,7 @@
         <file>up.png</file>
         <file>power.png</file>
         <file>select.png</file>
+        <file>charge.png</file>
+        <file>sensor.png</file>
     </qresource>
 </RCC>
