@@ -11,6 +11,10 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
     setupConnections();
 
+    currentTimerCount = 0;
+    bpProgress = 0;
+    bpIsIncreasing = true;
+    currentBattery = 100.0;
     currentSession = nullptr;
 }
 
@@ -55,7 +59,7 @@ void MainWindow::setupConnections(){
     connect(ui->chargeButton, &QPushButton::released, this, &MainWindow::chargeBattery);
 
     // Battery level spin box connection
-    connect(ui->batteryLevelSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryLevel);
+    connect(ui->batteryLevelSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
 
     //interface buttons connections
     connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::navigateUpMenu);
@@ -130,9 +134,9 @@ void MainWindow::startSession() {
 
     //Connect timer to update all session data
     QTimer* sessionTimer = currentSession->getTimer();
-    connect(sessionTimer, &QTimer::timeout, this, &MainWindow::updateSession);
+    connect(sessionTimer, &QTimer::timeout, this, &MainWindow::sessionTimerSlot);
     if (sensorOn == true) {
-        sessionTimer->start(5000);
+        sessionTimer->start(1000);
     }
 
     //Power Buttons and left and right buttons are blocked
@@ -141,29 +145,78 @@ void MainWindow::startSession() {
     ui->leftButton->blockSignals(true);
 }
 
-void MainWindow::updateSession() {
+void MainWindow::sessionTimerSlot() {
+    QTime currentTime = QTime::currentTime();
+    // change length in sessionView and update breath pacer every 1 second
+    if (currentTime.second() % 1 == 0) {
+        currentTimerCount++;
+        ui->lengthValue->setNum(currentTimerCount);
+        updateBP(setting->getBpInterval());
+    }
+    // update session data every 5 seconds
+    if (currentTime.second() % 5 == 0) {
+        updateSession();
+    }
+}
 
-    drainBattery();
+void MainWindow::updateSession() {
+    consumeBattery(3.0);
     currentSession->updateAll();
+    updateSessionView();
     plot();
 
     if (currentSession->getLength() >= MAX_SESSION_DURATION) {
-        //Save record
-        Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
-                                       currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                                       currentSession->getAchievementScore()/currentSession->getLength(),
-                                       currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+        endSession();
+    }
+}
 
-        database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
-                            currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                            currentSession->getAchievementScore()/currentSession->getLength(),
-                            currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+void MainWindow::endSession() {
+    currentTimerCount = 0;
+    bpProgress = 0;
+    bpIsIncreasing = true;
+    Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+                                   currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
+                                   currentSession->getAchievementScore()/currentSession->getLength(),
+                                   currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+    records.push_back(newRecord);
 
-        currentSession->getTimer()->stop();
-        currentSession->getTimer()->disconnect();
-        delete currentSession;
-        currentSession = nullptr;
-        displayReview(newRecord);
+    database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+                        currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
+                        currentSession->getAchievementScore()/currentSession->getLength(),
+                        currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+
+    currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
+    delete currentSession;
+    currentSession = nullptr;
+    displayReview(newRecord);
+}
+
+void MainWindow::updateSessionView() {
+    ui->coherenceValue->setNum(currentSession->getCoherenceScore());
+    ui->achievementScore->setNum(currentSession->getAchievementScore());
+    int coherenceLevel = currentSession->getCoherenceLevel();
+    switch(coherenceLevel) {
+        case 0 :
+            ui->lowLabel->setVisible(true);
+            ui->medLabel->setVisible(false);
+            ui->highLabel->setVisible(false);
+            break;
+        case 1 :
+            ui->lowLabel->setVisible(false);
+            ui->medLabel->setVisible(true);
+            ui->highLabel->setVisible(false);
+            break;
+        case 2 :
+            ui->lowLabel->setVisible(false);
+            ui->medLabel->setVisible(false);
+            ui->highLabel->setVisible(true);
+            break;
+        default:
+            ui->lowLabel->setVisible(true);
+            ui->medLabel->setVisible(false);
+            ui->highLabel->setVisible(false);
+            break;
     }
 }
 
@@ -202,7 +255,7 @@ void MainWindow::changePowerStatus() {
 //set power on/off state
 void MainWindow::powerSwitch() {
     //??getBattery() not ready, should getBattery() in Setting?
-    if (getBattery() > 0) {
+    if (currentBattery > 0) {
         powerOn  = !powerOn;
         changePowerStatus();
     }
@@ -228,8 +281,8 @@ void MainWindow::powerSwitch() {
 
 void MainWindow::chargeBattery() {
 
-    int batteryLevel = 100.0;
-    changeBatteryLevel(batteryLevel);
+    int fullyCharged = 100;
+    changeBatteryCapacity(fullyCharged);
 }
 
 
@@ -425,33 +478,15 @@ void MainWindow::parameterMinus() {
 }
 
 //Slot to change the battery level from the control panel
-void MainWindow::changeBatteryLevel(double newLevel) {
+void MainWindow::changeBatteryCapacity(double capacity) {
 
-    if (newLevel >= 0.0 && newLevel <= 100.0) {
-        if (newLevel == 0.0 && powerOn == true) {
-            powerSwitch();
-            setBattery(0);  //should this in Setting class
-        }else{
-            setBattery(newLevel);
-        }
-
-        ui->batteryLevelSpinBox->setValue(newLevel);
-        int newLevelInt = int(newLevel);
-        ui->batteryLevelBar->setValue(newLevelInt);
-
-        QString highBatteryHealth = "QProgressBar { selection-background-color: rgb(78, 154, 6); background-color: rgb(0, 0, 0); }";
-        QString mediumBatteryHealth = "QProgressBar { selection-background-color: rgb(196, 160, 0); background-color: rgb(0, 0, 0); }";
-        QString lowBatteryHealth = "QProgressBar { selection-background-color: rgb(164, 0, 0); background-color: rgb(0, 0, 0); }";
-
-        if (newLevelInt >= 50) {
-            ui->batteryLevelBar->setStyleSheet(highBatteryHealth);
-        }
-        else if (newLevelInt >= 20) {
-            ui->batteryLevelBar->setStyleSheet(mediumBatteryHealth);
-        }
-        else {
-            ui->batteryLevelBar->setStyleSheet(lowBatteryHealth);
-        }
+    if (capacity >= 0 && capacity <= 100) {
+        currentBattery = capacity;
+        ui->battery->setValue(currentBattery);
+        ui->batterySpinBox->setValue(currentBattery);
+    }else {
+        powerSwitch();
+        currentBattery = 0;
     }
 }
 
@@ -478,12 +513,8 @@ void MainWindow::activateSensor(int value) {
     activateSensor(value == 1);
 }
 
-void MainWindow::drainBattery() {
-
-    //1000 constant because 15 minutes is the longest therapy and we feel as it should last at least 15 minutes at full power
-    double batteryLevel = qMax(getBattery() - getBattery/1000.0, 0.0);
-
-    changeBatteryLevel(batteryLevel);
+void MainWindow::consumeBattery(double consumption) {
+    changeBatteryCapacity(currentBattery - consumption);
 }
 
 void MainWindow::changeChallengeLevel(int level) {
@@ -550,26 +581,19 @@ void MainWindow::plot() {
 //    addPlot(&tests);
 //}
 
-void MainWindow::initBP(QTimer* timer) {
-    int progress = 0;
-    bool isIncreasing = true;
-
-    connect(timer, &QTimer::timeout,[this,&progress, &isIncreasing]() {
-        if (isIncreasing) {
-            progress += 20; // change this value to control the speed of progress change
-            if (progress >= 100) {
-                isIncreasing = false;
-            }
-        } else {
-            progress -= 20; // change this value to control the speed of progress change
-            if (progress <= 0) {
-                isIncreasing = true;
-            }
+void MainWindow::updateBP(int interval) {
+    if (bpIsIncreasing) {
+        bpProgress += (200/interval);
+        if (bpProgress >= 100) {
+            bpIsIncreasing = false;
         }
-        ui->bp->setValue(progress);
-    });
-
-    timer->start(1000);
+    } else {
+        bpProgress -= (200/interval);
+        if (bpProgress <= 0) {
+            bpIsIncreasing = true;
+        }
+    }
+    ui->bp->setValue(bpProgress);
 }
 
 //QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {

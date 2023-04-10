@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -513,6 +513,9 @@ background-color:rgb(239, 41, 41);
         <width>381</width>
         <height>20</height>
        </rect>
+      </property>
+      <property name="styleSheet">
+       <string notr="true">QProgressBar { border: none; }</string>
       </property>
       <property name="value">
        <number>24</number>
