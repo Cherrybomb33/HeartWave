@@ -156,14 +156,11 @@ bool DBController::deleteRecord(const QDateTime& time) {
   achievementScore - total sum of coherence scores sampled every 5 seconds
   Returen true if the parameters are all valid and false otherwise
 */
-bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore) {
+bool DBController::isValidRecord(const QDateTime& time, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore) {
     bool isValid = true;
 
     if (!time.isValid()) {
         qDebug() << "Error: Database cannot add record, datetime is not valid";
-        isValid = false;
-    }else if (challengeLevel < 1 || challengeLevel > 4) {
-        qDebug() << "Error: Database cannot add record, challenge level is not valid";
         isValid = false;
     }else if (length <= 0) {
         qDebug() << "Error: Database cannot add record, length is not valid";
@@ -176,12 +173,12 @@ bool DBController::isValidRecord(const QDateTime& time, const int challengeLevel
 }
 
 //add a session record to the database and return true if successful and false otherwise.
-bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph) { 
+bool DBController::addRecord(const QDateTime &time, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF> &hrvGraph){
     //validate data
-    if (!isValidRecord(datetime, challengeLevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore)) {
+    if (!isValidRecord(time, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore)) {
         return false;
     }
-    
+
     //start a new transaction
     if (!heartwaveDB.transaction()) {
         qDebug() << "Error: Transaction failed to start:" << heartwaveDB.lastError().text();
@@ -197,12 +194,11 @@ bool DBController::addRecord(const QDateTime& datetime, const int challengeLevel
     }
     QString hrvGraphString = hrvGraphStringList.join(";");
 
-    //prepare the INSERT statement 
+    //prepare the INSERT statement
     query.prepare("INSERT INTO sessionRecords (datetime, challengelevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph) VALUES (:datetime, :challengelevel, :length, :lowPercentage, :medPercentage, :highPercentage, :averageCoherence, :achievementScore, :hrvGraph)");
 
     //bind the values of involved parameters to the prepared INSERT statement
-    query.bindValue(":datetime", datetime.toString(DATE_FORMAT));
-    query.bindValue(":challengelevel", challengeLevel);
+    query.bindValue(":datetime", time.toString(DATE_FORMAT));
     query.bindValue(":length", length);
     query.bindValue(":lowPercentage", lowPercentage);
     query.bindValue(":medPercentage", medPercentage);
