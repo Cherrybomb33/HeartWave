@@ -10,6 +10,8 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     setupConnections();
+
+    currentSession = nullptr;
 }
 
 //destructor
@@ -119,6 +121,54 @@ void MainWindow::initializeMenu(Menu* m) {
         record->addChildMenu(new Menu("DELETE", {}, record));
         historyMenu->addChildMenu(record);
     }
+}
+
+void MainWindow::startSession() {
+    currentSession = new Session();
+    ui->contact->setVisible(true);
+    ui->sessionView->setVisible(true);
+
+    //Connect timer to update all session data
+    QTimer* sessionTimer = currentSession->getTimer();
+    connect(sessionTimer, &QTimer::timeout, this, &MainWindow::updateSession);
+    if (sensorOn == true) {
+        sessionTimer->start(5000);
+    }
+
+    //Power Buttons and left and right buttons are blocked
+    ui->powerButton->blockSignals(true);
+    ui->rightButton->blockSignals(true);
+    ui->leftButton->blockSignals(true);
+}
+
+void MainWindow::updateSession() {
+
+    drainBattery();
+    currentSession->updateAll();
+    plot();
+
+    if (currentSession->getLength() >= MAX_SESSION_DURATION) {
+        //Save record
+        Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+                                       currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
+                                       currentSession->getAchievementScore()/currentSession->getLength(),
+                                       currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+
+        database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+                            currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
+                            currentSession->getAchievementScore()/currentSession->getLength(),
+                            currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+
+        currentSession->getTimer()->stop();
+        currentSession->getTimer()->disconnect();
+        delete currentSession;
+        currentSession = nullptr;
+        displayReview(newRecord);
+    }
+}
+
+void MainWindow::displayReview(Record* newRecord) {
+
 }
 
 //Disable UI for power-off, and enable the UI for power-on
@@ -263,18 +313,6 @@ void MainWindow::navigateSubMenu() {
         //display the record
         //MainWindow::updateMenu("RECORDS", allRecords);
     }
-}
-
-void MainWindow::initializeTimer(QTimer* t) {
-
-    connect(t, &QTimer::timeout, this, &MainWindow::updateTimer);
-
-    if (sensorOn == true) {
-        t->start(1000);
-    }
-}
-
-void MainWindow::updateTimer() {
 }
 
 void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
@@ -454,43 +492,63 @@ void MainWindow::changeChallengeLevel(int level) {
     ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
 }
 
-void MainWindow::plot(QVector<QPointF>** points) {
-    int size = (*points)->size();
+void MainWindow::plot() {
+    QVector<QPointF>* points = currentSession->getHRVData();
+    int size = points->size();
+    double previousX = 0;
     QVector<double> x(size), y(size);
     for (int i=0; i<size; i++) {
-      x[i] = (*points)->at(i).x() + previousX;
-      y[i] = (*points)->at(i).y();
+      x[i] = points->at(i).x() + previousX;
+      y[i] = points->at(i).y();
       previousX = x[i];
       qInfo() << x[i] << "|" << y[i];
     }
-    ui->hrvGraph->QCustomPlot::addGraph();
-    ui->hrvGraph->graph(0)->setData(x, y);
-    ui->hrvGraph->xAxis->setLabel("Time");
-    ui->hrvGraph->yAxis->setLabel("HR");
-    ui->hrvGraph->xAxis->setRange(0, 124);
-    ui->hrvGraph->yAxis->setRange(55, 105);
-    ui->hrvGraph->replot();
+    ui->sessionGraph->QCustomPlot::addGraph();
+    ui->sessionGraph->graph(0)->setData(x, y);
+    ui->sessionGraph->xAxis->setLabel("Time");
+    ui->sessionGraph->yAxis->setLabel("HR");
+    ui->sessionGraph->xAxis->setRange(0, 124);
+    ui->sessionGraph->yAxis->setRange(55, 105);
+    ui->sessionGraph->replot();
 }
 
-void MainWindow::addPlot(QVector<QPointF>** points) {
-    int size = (*points)->size();
-    QVector<double> x(size), y(size);
-    for (int i=0; i<size; i++) {
-      x[i] = (*points)->at(i).x() + previousX;
-      y[i] = (*points)->at(i).y();
-      previousX = x[i];
-      qInfo()<< "????" << x[i] << "|" << y[i];
-    }
-    ui->hrvGraph->graph(0)->addData(x,y);
-    ui->hrvGraph->replot();
-}
+//void MainWindow::plot(QVector<QPointF>** points) {
+//    int size = (*points)->size();
+//    QVector<double> x(size), y(size);
+//    for (int i=0; i<size; i++) {
+//      x[i] = (*points)->at(i).x() + previousX;
+//      y[i] = (*points)->at(i).y();
+//      previousX = x[i];
+//      qInfo() << x[i] << "|" << y[i];
+//    }
+//    ui->hrvGraph->QCustomPlot::addGraph();
+//    ui->hrvGraph->graph(0)->setData(x, y);
+//    ui->hrvGraph->xAxis->setLabel("Time");
+//    ui->hrvGraph->yAxis->setLabel("HR");
+//    ui->hrvGraph->xAxis->setRange(0, 124);
+//    ui->hrvGraph->yAxis->setRange(55, 105);
+//    ui->hrvGraph->replot();
+//}
 
-void MainWindow::another5Sec()
-{
-    QVector<double>* points = currentSession->simulateHeartIntervals(5);
-    QVector<QPointF>* tests = calPoints(&points);
-    addPlot(&tests);
-}
+//void MainWindow::addPlot(QVector<QPointF>** points) {
+//    int size = (*points)->size();
+//    QVector<double> x(size), y(size);
+//    for (int i=0; i<size; i++) {
+//      x[i] = (*points)->at(i).x() + previousX;
+//      y[i] = (*points)->at(i).y();
+//      previousX = x[i];
+//      qInfo()<< "????" << x[i] << "|" << y[i];
+//    }
+//    ui->hrvGraph->graph(0)->addData(x,y);
+//    ui->hrvGraph->replot();
+//}
+
+//void MainWindow::another5Sec()
+//{
+//    QVector<double>* points = currentSession->simulateHeartIntervals(5);
+//    QVector<QPointF>* tests = calPoints(&points);
+//    addPlot(&tests);
+//}
 
 void MainWindow::initBP(QTimer* timer) {
     int progress = 0;
@@ -514,11 +572,11 @@ void MainWindow::initBP(QTimer* timer) {
     timer->start(1000);
 }
 
-QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {
-    QVector<QPointF>* points = new QVector<QPointF>();
-    for (int i = 0;i < (*times)->size();i++) {
-        QPointF newPoint((*times)->at(i),60/(*times)->at(i));
-        points->push_back(newPoint);
-    }
-    return points;
-}
+//QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {
+//    QVector<QPointF>* points = new QVector<QPointF>();
+//    for (int i = 0;i < (*times)->size();i++) {
+//        QPointF newPoint((*times)->at(i),60/(*times)->at(i));
+//        points->push_back(newPoint);
+//    }
+//    return points;
+//}
