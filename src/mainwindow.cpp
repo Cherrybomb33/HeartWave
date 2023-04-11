@@ -26,9 +26,8 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupConnections(){
     // Initialize timer counter
-    //currentTimerCount = -1;  0 or -1?
 
-    currentTimerCount = 0;
+    currentTimerCount = -1;
     bpProgress = 0;
     bpIsIncreasing = true;
     currentBattery = 100.0;
@@ -146,6 +145,7 @@ void MainWindow::startSession() {
 
     //Connect timer to update all session data
     QTimer* sessionTimer = currentSession->getTimer();
+    currentTimerCount = 0;
     connect(sessionTimer, &QTimer::timeout, this, &MainWindow::sessionTimerSlot);
     if (sensorOn == true) {
         sessionTimer->start(1000);
@@ -185,7 +185,7 @@ void MainWindow::updateSession() {
 void MainWindow::endSession() {
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
-    currentTimerCount = 0;
+    currentTimerCount = -1;
     bpProgress = 0;
     bpIsIncreasing = true;
     Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
