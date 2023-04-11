@@ -15,10 +15,10 @@ Record::Record(const QDateTime& time, const int length, const double lowPercenta
     }
 }
 
-//??this function needs to show hrv graph
+
 QString Record::toString() {
     QString newString = 
-            "Session record:\n";
+            "Session record:\n"
             + startTime.toString("ddd h:mm ap") + "\n"
 //            + "   ChallengeLevel: " + QString::number(challengeLevel) + "\n"
             + "Low percentage: " + QString::number(lowPercentage) + "\n"
