@@ -222,7 +222,16 @@ void MainWindow::updateSessionView() {
 }
 
 void MainWindow::displayReview(Record* newRecord) {
+    ui->date->setText((newRecord->getStartTime()).toString("yyyy-MM-dd hh:mm:ss"));
+    ui->avgScore->setNum(newRecord->getAverageCoherence());
+    ui->achScore->setNum(newRecord->getAchievementScore());
+    ui->lenScore->setNum(newRecord->getLength());
+    ui->lowPercentage->setText(number(newRecord->getLowPercentage())+"%");
+    ui->mediumPercentage->setText(number(newRecord->getMedPercentage())+"%");
+    ui->highPercentage->setText(number(newRecord->getHighPercentage())+"%");
+    //how to show hrv graph?
 
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 //Disable UI for power-off, and enable the UI for power-on
