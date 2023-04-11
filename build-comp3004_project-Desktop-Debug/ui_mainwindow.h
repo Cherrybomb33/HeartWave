@@ -25,7 +25,7 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
-#include "qcustomplot.h"
+#include "src/qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -67,14 +67,14 @@ public:
     QLabel *low;
     QLabel *medium;
     QLabel *high;
-    QLabel *avgSore;
+    QLabel *avgScore;
     QLabel *achScore;
     QLabel *lenScore;
     QLabel *lowPercentage;
     QLabel *mediumPercentage;
     QLabel *highPercentage;
-    QLabel *avgLabel_2;
-    QLabel *avgSore_2;
+    QLabel *dateLabel;
+    QLabel *date;
     QCustomPlot *historyGraph;
     QLabel *menuLabel;
     QPushButton *sensorButton;
@@ -327,14 +327,14 @@ public:
         high->setObjectName(QString::fromUtf8("high"));
         high->setGeometry(QRect(410, 220, 41, 16));
         high->setFont(font4);
-        avgSore = new QLabel(historyView);
-        avgSore->setObjectName(QString::fromUtf8("avgSore"));
-        avgSore->setGeometry(QRect(520, 50, 54, 17));
+        avgScore = new QLabel(historyView);
+        avgScore->setObjectName(QString::fromUtf8("avgScore"));
+        avgScore->setGeometry(QRect(520, 50, 54, 17));
         QFont font6;
         font6.setFamily(QString::fromUtf8("System-ui"));
         font6.setBold(true);
         font6.setWeight(75);
-        avgSore->setFont(font6);
+        avgScore->setFont(font6);
         achScore = new QLabel(historyView);
         achScore->setObjectName(QString::fromUtf8("achScore"));
         achScore->setGeometry(QRect(550, 80, 41, 16));
@@ -355,14 +355,14 @@ public:
         highPercentage->setObjectName(QString::fromUtf8("highPercentage"));
         highPercentage->setGeometry(QRect(460, 220, 54, 17));
         highPercentage->setFont(font6);
-        avgLabel_2 = new QLabel(historyView);
-        avgLabel_2->setObjectName(QString::fromUtf8("avgLabel_2"));
-        avgLabel_2->setGeometry(QRect(410, 20, 51, 21));
-        avgLabel_2->setFont(font3);
-        avgSore_2 = new QLabel(historyView);
-        avgSore_2->setObjectName(QString::fromUtf8("avgSore_2"));
-        avgSore_2->setGeometry(QRect(460, 20, 121, 16));
-        avgSore_2->setFont(font6);
+        dateLabel = new QLabel(historyView);
+        dateLabel->setObjectName(QString::fromUtf8("dateLabel"));
+        dateLabel->setGeometry(QRect(410, 20, 51, 21));
+        dateLabel->setFont(font3);
+        date = new QLabel(historyView);
+        date->setObjectName(QString::fromUtf8("date"));
+        date->setGeometry(QRect(460, 20, 121, 16));
+        date->setFont(font6);
         historyGraph = new QCustomPlot(historyView);
         historyGraph->setObjectName(QString::fromUtf8("historyGraph"));
         historyGraph->setGeometry(QRect(30, 20, 361, 221));
@@ -427,7 +427,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        stackedWidget->setCurrentIndex(0);
+        stackedWidget->setCurrentIndex(1);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
@@ -461,14 +461,14 @@ public:
         low->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#cc0000;\">Low:</span></p></body></html>", nullptr));
         medium->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#204a87;\">Mediium:</span></p></body></html>", nullptr));
         high->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#4e9a06;\">High:</span></p></body></html>", nullptr));
-        avgSore->setText(QApplication::translate("MainWindow", "0.0", nullptr));
+        avgScore->setText(QApplication::translate("MainWindow", "0.0", nullptr));
         achScore->setText(QApplication::translate("MainWindow", "0.0", nullptr));
         lenScore->setText(QApplication::translate("MainWindow", "00:00", nullptr));
         lowPercentage->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#a40000;\">0.0%</span></p></body></html>", nullptr));
         mediumPercentage->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#204a87;\">0.0%</span></p></body></html>", nullptr));
         highPercentage->setText(QApplication::translate("MainWindow", "<html><head/><body><p><span style=\" color:#4e9a06;\">0.0%</span></p></body></html>", nullptr));
-        avgLabel_2->setText(QApplication::translate("MainWindow", "Date:", nullptr));
-        avgSore_2->setText(QApplication::translate("MainWindow", "2023-04-10 13:00", nullptr));
+        dateLabel->setText(QApplication::translate("MainWindow", "Date:", nullptr));
+        date->setText(QApplication::translate("MainWindow", "2023-04-10 13:00", nullptr));
         menuLabel->setText(QApplication::translate("MainWindow", "<html><head/><body><p align=\"center\"><span style=\" font-weight:600; color:#e9b96e;\">MENU</span></p></body></html>", nullptr));
         sensorButton->setText(QString());
         batteryLabel->setText(QApplication::translate("MainWindow", "Battery:", nullptr));
