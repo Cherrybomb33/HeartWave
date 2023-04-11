@@ -28,7 +28,7 @@
       <x>10</x>
       <y>40</y>
       <width>600</width>
-      <height>300</height>
+      <height>310</height>
      </rect>
     </property>
     <property name="styleSheet">
@@ -39,9 +39,9 @@
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>65</y>
+      <y>85</y>
       <width>600</width>
-      <height>275</height>
+      <height>265</height>
      </rect>
     </property>
    </widget>
@@ -360,8 +360,8 @@ background-color:rgb(239, 41, 41);
      <rect>
       <x>10</x>
       <y>90</y>
-      <width>601</width>
-      <height>261</height>
+      <width>600</width>
+      <height>260</height>
      </rect>
     </property>
     <property name="font">
@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -518,7 +518,7 @@ background-color:rgb(239, 41, 41);
        <string notr="true">QProgressBar { border: none; }</string>
       </property>
       <property name="value">
-       <number>24</number>
+       <number>0</number>
       </property>
      </widget>
      <widget class="QCustomPlot" name="sessionGraph" native="true">
@@ -857,7 +857,7 @@ background-color:rgb(239, 41, 41);
     <property name="geometry">
      <rect>
       <x>10</x>
-      <y>70</y>
+      <y>65</y>
       <width>601</width>
       <height>20</height>
      </rect>
@@ -869,6 +869,9 @@ background-color:rgb(239, 41, 41);
       <weight>75</weight>
       <bold>true</bold>
      </font>
+    </property>
+    <property name="styleSheet">
+     <string notr="true">background-color: rgb(255, 255, 255);</string>
     </property>
     <property name="text">
      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;&lt;span style=&quot; font-weight:600; color:#e9b96e;&quot;&gt;MENU&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
