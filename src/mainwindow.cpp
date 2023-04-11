@@ -47,7 +47,7 @@ void MainWindow::setupConnections(){
 
     // Initialize the main menu view
     //activeQListWidget = ui->menuListWidget;
-    ui->menuListWidget->addItems(currentMenu->getMenuItems());
+    ui->menuListWidget->addItems(currentMenu->getMenuOptions());
     ui->menuListWidget->setCurrentRow(0);
     ui->menuLabel->setText(currentMenu->getName());
 
@@ -67,8 +67,8 @@ void MainWindow::setupConnections(){
     connect(ui->selectButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
-    connect(ui->rightButton, &QPushButton::pressed, this, &MainWindow::ParameterPlus);
-    connect(ui->leftButton, &QPushButton::pressed, this, &MainWindow::ParameterMinus);
+    connect(ui->rightButton, &QPushButton::pressed, this, &MainWindow::parameterPlus);
+    connect(ui->leftButton, &QPushButton::pressed, this, &MainWindow::parameterMinus);
     connect(ui->sensorButton, &QPushButton::clicked, this, QOverload<bool>::of(&MainWindow::activateSensor));
 
     // prevent signals from being emitted(send signals only for BP interval setting interaction)
@@ -81,12 +81,11 @@ void MainWindow::setupConnections(){
     // Initialize battery levels
     ui->batterySpinBox->setValue(currentBattery);
     
-    ui->sessionViewWidget->setVisible(false);
-    ui->sensorLabel->setVisible(false);
+    ui->stackedWidget->setVisible(false);
+    ui->contact->setVisible(false);
     
     //Load records from the database
-    allRecords = database->getHistory();
-    database->getRecord(const QDateTime& time, Record** record);
+    initializeHistory();
 }
 
 void MainWindow::initializeMenu(Menu* menu) {
@@ -98,7 +97,7 @@ void MainWindow::initializeMenu(Menu* menu) {
     settingList.append("BREATH PACER INTERVAL");
 
     //create submenu options of history
-    historyList = database.getHistory();
+    historyList = database->getHistory();
     
     Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
     Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
@@ -239,9 +238,9 @@ void MainWindow::displayReview(Record* newRecord) {
     ui->avgScore->setNum(newRecord->getAverageCoherence());
     ui->achScore->setNum(newRecord->getAchievementScore());
     ui->lenScore->setNum(newRecord->getLength());
-    ui->lowPercentage->setText(number(newRecord->getLowPercentage())+"%");
-    ui->mediumPercentage->setText(number(newRecord->getMedPercentage())+"%");
-    ui->highPercentage->setText(number(newRecord->getHighPercentage())+"%");
+    ui->lowPercentage->setText(QString::number(newRecord->getLowPercentage())+"%");
+    ui->mediumPercentage->setText(QString::number(newRecord->getMedPercentage())+"%");
+    ui->highPercentage->setText(QString::number(newRecord->getHighPercentage())+"%");
     //how to show hrv graph?
     plotHistory(newRecord);
 
@@ -369,7 +368,7 @@ void MainWindow::navigateSubMenu() {
 
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "DELETE") {
         //currentMenu = currentMenu->get(index);
-        QString datatimeString = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
+        QString datatimeString = currentMenu->getParentMenu()->getName().left(19); //get datetime Qstring
         QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
 
         for (int i = 0; i < records.size(); i++) {
@@ -386,7 +385,7 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
-        QString datatimeString = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
+        QString datatimeString = currentMenu->getParentMenu()->getName().left(19); //get datetime Qstring
         QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
         currentMenu = currentMenu->get(index);
         updateMenu("Record", {});
@@ -460,14 +459,14 @@ void MainWindow::navigateBack() {
 
 
 void MainWindow::parameterPlus() {
-    int index = activeQListWidget->currentRow();
+    int index = ui->menuListWidget->currentRow();
     //int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
     if (currentMenu->getName() == "SETTING"){
         if (index == 1 && currentBpInterval <=29){
-            currentBpInterval = setting->setBpInterval(currentBpInterval+1);
-            activeQListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+            setting->setBpInterval(currentBpInterval+1);
+            ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
         }
     }
 }
@@ -481,8 +480,8 @@ void MainWindow::parameterMinus() {
 
     if (currentMenu->getName() == "SETTING"){
         if (index == 1 && currentBpInterval >1){
-            currentBpInterval = setting->setBpInterval(currentBpInterval-1);
-            ui->menuListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+            setting->setBpInterval(currentBpInterval-1);
+            ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
         }
     }
 }
@@ -504,7 +503,7 @@ void MainWindow::changeBatteryCapacity(double capacity) {
 void MainWindow::activateSensor(bool checked) {
 
     //ui->sensorLabel->setPixmap(QPixmap(checked ? ":/icons/sensorOn.svg" : ":/icons/sensorOff.svg"));
-    ui->sensorComboBox->setCurrentIndex(checked ? 1 : 0);
+    //ui->sensorComboBox->setCurrentIndex(checked ? 1 : 0);
     sensorOn = checked;
 
     if (currentTimerCount != -1) {

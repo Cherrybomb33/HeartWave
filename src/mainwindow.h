@@ -71,7 +71,7 @@ private:
 //    QVector<QPointF>* calPoints(QVector<double>** times);
     void updateSession();
     void plot();
-    void plotHstory(Record *Record);
+    void plotHistory(Record *Record);
     void displayReview(Record *newRecord);
     void updateBP(int interval);
     void endSession();

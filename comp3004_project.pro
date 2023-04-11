@@ -51,3 +51,7 @@ DISTFILES +=
 
 RESOURCES += \
     res/res.qrc
+
+QT += sql
+
+QT += printsupport
