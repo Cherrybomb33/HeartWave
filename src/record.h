@@ -22,6 +22,7 @@ public:
     double getAverageCoherence();
     int getLength();
     double getAchievementScore();
+    QVector<QPointF> getHrvGraph() const;
 
 private:
     QDateTime startTime;

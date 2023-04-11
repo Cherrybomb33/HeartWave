@@ -32,9 +32,9 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupConnections(){
     // Initialize timer counter
-    currentTimerCount = -1;
+    //currentTimerCount = -1;  0 or -1?
 
-    //set Initial sensor status
+    //set initial sensor status
     sensorOn = false;
 
     //create database connection
@@ -46,9 +46,9 @@ void MainWindow::setupConnections(){
     initializeMenu(currentMenu);
 
     // Initialize the main menu view
-    activeQListWidget = ui->mainMenuListView;
-    activeQListWidget->addItems(currentMenu->getMenuItems());
-    activeQListWidget->setCurrentRow(0);
+    //activeQListWidget = ui->menuListWidget;
+    ui->menuListWidget->addItems(currentMenu->getMenuItems());
+    ui->menuListWidget->setCurrentRow(0);
     ui->menuLabel->setText(currentMenu->getName());
 
     powerOn = false;
@@ -56,66 +56,61 @@ void MainWindow::setupConnections(){
     connect(ui->powerButton, &QPushButton::released, this, &MainWindow::powerSwitch);
 
     // charge button connection
-    connect(ui->chargeButton, &QPushButton::released, this, &MainWindow::chargeBattery);
+    connect(ui->batteryPushButton, &QPushButton::released, this, &MainWindow::chargeBattery);
 
-    // Battery level spin box connection
-    connect(ui->batteryLevelSpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
+    // Battery level spinbox connection
+    connect(ui->batterySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
 
     //interface buttons connections
     connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::navigateUpMenu);
     connect(ui->downButton, &QPushButton::pressed, this, &MainWindow::navigateDownMenu);
-    connect(ui->selectorButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
+    connect(ui->selectButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
     connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
     connect(ui->rightButton, &QPushButton::pressed, this, &MainWindow::ParameterPlus);
     connect(ui->leftButton, &QPushButton::pressed, this, &MainWindow::ParameterMinus);
     connect(ui->sensorButton, &QPushButton::clicked, this, QOverload<bool>::of(&MainWindow::activateSensor));
 
-    // Disable Power Buttons
-    ui->rightButton->blockSignals(true);
+    // prevent signals from being emitted(send signals only for BP interval setting interaction)
     ui->leftButton->blockSignals(true);
-
+    ui->rightButton->blockSignals(true);
 
     //sensor QComboBox connections
-    connect(ui->sensorComboBox, QOverload<int>::of(&QComboBox::activated), this, QOverload<int>::of(&MainWindow::activateSensor));
-
-    // Change power level from panel
-    connect(ui->powerLevelSpinBox, QOverload<int>::of(&QSpinBox::valueChanged), this, &MainWindow::changePowerLevel);
+    //connect(ui->sensorComboBox, QOverload<int>::of(&QComboBox::activated), this, QOverload<int>::of(&MainWindow::activateSensor));
 
     // Initialize battery levels
-    ui->batteryLevelSpinBox->setValue(99.9);
+    ui->batterySpinBox->setValue(currentBattery);
     
     ui->sessionViewWidget->setVisible(false);
     ui->sensorLabel->setVisible(false);
     
     //Load records from the database
     allRecords = database->getHistory();
+    database->getRecord(const QDateTime& time, Record** record);
 }
 
-void MainWindow::initializeMenu(Menu* m) {
+void MainWindow::initializeMenu(Menu* menu) {
     QStringList settingList;
     QStringList historyList;
 
     //create submenu options of setting
-    settingList.append("CHALLENGE LEVEL");
-    settingList.append("BREATH PACER INTERVAL");
     settingList.append("RESET");
+    settingList.append("BREATH PACER INTERVAL");
+
 
     //create submenu options of history
     historyList = database.getHistory();
     
-    Menu* sessionMenu = new Menu("START NEW SESSION", {}, m);
-    Menu* settingMenu = new Menu("SETTINGS", settingList, m);
-    Menu* historyMenu = new Menu("HISTORY", historyList, m);
+    Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
+    Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
+    Menu* historyMenu = new Menu("HISTORY", historyList, menu);
 
-    m->addChildMenu(sessionMenu);
-    m->addChildMenu(settingMenu);
-    m->addChildMenu(historyMenu);
+    menu->addChildMenu(sessionMenu);
+    menu->addChildMenu(settingMenu);
+    menu->addChildMenu(historyMenu);
 
     Menu* resetMenu = new Menu("RESET", {"YES","NO"}, settingMenu);
     settingMenu->addChildMenu(resetMenu);
-
-    //historyMenu->addChildMenu(new Menu(,{}));
     
     //create menus and submenus for each record in historyMenu
     for (const QString &str : historyList) {
@@ -127,10 +122,29 @@ void MainWindow::initializeMenu(Menu* m) {
     }
 }
 
+//initializa history menu
+void MainWindow::initializeHistory() {
+    //Load records from the database
+    allRecords = database->getHistory();
+
+    //create corresponding Record objects and add them to records
+    for (const QString& str : allRecords) {
+        //convert the datetime string to a QDateTime object
+        QDateTime datetime = QDateTime::fromString(str.left(19), "yyyy-MM-dd HH:mm:ss");
+
+        //create the Record object for the datetime and add it to the QVector
+        Record* record = nullptr;
+        database->getRecord(datetime, &record);
+        records.append(record);
+    }
+}
+
 void MainWindow::startSession() {
     currentSession = new Session();
     ui->contact->setVisible(true);
-    ui->sessionView->setVisible(true);
+    //ui->sessionView->setVisible(true);
+    ui->stackedWidget->setVisible(true);
+    ui->stackedWidget->setCurrentIndex(0);   //session page
 
     //Connect timer to update all session data
     QTimer* sessionTimer = currentSession->getTimer();
@@ -222,17 +236,26 @@ void MainWindow::updateSessionView() {
 }
 
 void MainWindow::displayReview(Record* newRecord) {
+    ui->date->setText((newRecord->getStartTime()).toString("yyyy-MM-dd hh:mm:ss"));
+    ui->avgScore->setNum(newRecord->getAverageCoherence());
+    ui->achScore->setNum(newRecord->getAchievementScore());
+    ui->lenScore->setNum(newRecord->getLength());
+    ui->lowPercentage->setText(number(newRecord->getLowPercentage())+"%");
+    ui->mediumPercentage->setText(number(newRecord->getMedPercentage())+"%");
+    ui->highPercentage->setText(number(newRecord->getHighPercentage())+"%");
+    //how to show hrv graph?
+    plotHistory(newRecord);
 
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 //Disable UI for power-off, and enable the UI for power-on
 void MainWindow::changePowerStatus() {
 
-    activeQListWidget->setVisible(powerOn);
+    ui->menuListWidget->setVisible(powerOn);
     ui->menuLabel->setVisible(powerOn);
     ui->statusBarQFrame->setVisible(powerOn);   //display battery level and sensor detector
-    ui->sessionView->setVisible(powerOn);
-    //ui->frequencyLabel->setVisible(powerOn);  //display sth at the bottom of the screen
+    ui->stackedWidget->setVisible(powerOn);
     ui->sessionViewWidget->setVisible(powerOn);
 
     //Remove this if we want the menu to stay in the same position when the power is off
@@ -247,10 +270,10 @@ void MainWindow::changePowerStatus() {
     ui->leftButton->setEnabled(powerOn);
     ui->rightButton->setEnabled(powerOn);
     ui->menuButton->setEnabled(powerOn);
-    ui->selectorButton->setEnabled(powerOn);
+    ui->selectButton->setEnabled(powerOn);
     ui->backButton->setEnabled(powerOn);
     ui->sensorButton->setEnabled(powerOn);
-    ui->sensorComboBox->setEnabled(powerOn);  //control panel
+    //ui->sensorComboBox->setEnabled(powerOn);  //control panel
 }
 
 //set power on/off state
@@ -289,31 +312,31 @@ void MainWindow::chargeBattery() {
 
 void MainWindow::navigateUpMenu() {
 
-    int nextIndex = activeQListWidget->currentRow() - 1;
+    int nextIndex = ui->menuListWidget->currentRow() - 1;
 
     if (nextIndex < 0) {
-        nextIndex = activeQListWidget->count() - 1;
+        nextIndex = ui->menuListWidget->count() - 1;
     }
 
-    activeQListWidget->setCurrentRow(nextIndex);
+    ui->menuListWidget->setCurrentRow(nextIndex);
 }
 
 
 void MainWindow::navigateDownMenu() {
 
-    int nextIndex = activeQListWidget->currentRow() + 1;
+    int nextIndex = ui->menuListWidget->currentRow() + 1;
 
-    if (nextIndex > activeQListWidget->count() - 1) {
+    if (nextIndex > ui->menuListWidget->count() - 1) {
         nextIndex = 0;
     }
 
-    activeQListWidget->setCurrentRow(nextIndex);
+    ui->menuListWidget->setCurrentRow(nextIndex);
 }
 
-//press selectorButton
+//press selectButton
 void MainWindow::navigateSubMenu() {
 
-    int index = activeQListWidget->currentRow();
+    int index = ui->menuListWidget->currentRow();
     if (index < 0) return;
 
     // Prevent crash if ok button is selected in view
@@ -321,7 +344,7 @@ void MainWindow::navigateSubMenu() {
         //return;
     //}
 
-    //when the menu is the reset menu.
+    //when the menu is the reset menu
     if (currentMenu->getName() == "RESET") {
         if (currentMenu->getMenuOptions()[index] == "YES") {
             for (int i = 0; i < records.size(); i++) {
@@ -341,118 +364,117 @@ void MainWindow::navigateSubMenu() {
         }
     }
 
-    //If the menu is a parent and clicking on it should display more menus.
+    //If the menu is a parent and clicking on it will display sub menus.
     if (currentMenu->get(index)->getMenuOptions().length() > 0) {
         currentMenu = currentMenu->get(index);
         MainWindow::updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
 
-
-    }//If the menu is not a parent and clicking on it should start a session
-    else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "START NEW SESSION") {
+     //If the menu is not a parent and clicking on it starts a session
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "START NEW SESSION") {
         //Update new menu info
         currentMenu = currentMenu->get(index);
         MainWindow::updateMenu("Measuring", {});
-        MainWindow::beginSession();
+        MainWindow::startSession();
 
-    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "VIEW") {
-        currentMenu = currentMenu->get(index);
-        MainWindow::updateMenu("Record", {});
-        MainWindow::displayRecord();
-    }
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "DELETE") {
+        //currentMenu = currentMenu->get(index);
+        QString datatimeString = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
+        QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+
+        for (int i = 0; i < records.size(); i++) {
+            if (records[i]->getStartTime() == datetime) {
+                database->deleteRecord(datetime);
+                delete records[i];
+                records.remove(i);
+                qDebug() << "Record deleted successfully!";
+                return;
+            }
+        }
+
+        qDebug() << "No matching record found.";
 
     //If the button pressed should display the records.
-    else if (currentMenu->get(index)->getName() == "VIEW") {
-        QString datatime = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
+    }else if (currentMenu->get(index)->getName() == "VIEW") {
+        QString datatimeString = currentMenu->getParentMenu()->text().left(19); //get datetime Qstring
+        QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
         currentMenu = currentMenu->get(index);
-        //display the record
-        //MainWindow::updateMenu("RECORDS", allRecords);
+        updateMenu("Record", {});
+
+        for (Record* record : records) {
+            if (record->getStartTime() == datetime) {
+                displayReview(record);
+                return;
+            }
+        }
+
+        qDebug() << "No matching record found.";
     }
 }
 
 void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
 
-    activeQListWidget->clear();
-    activeQListWidget->addItems(menuItems);
-    activeQListWidget->setCurrentRow(0);
+    ui->menuListWidget->clear();
+    ui->menuListWidget->addItems(menuItems);
+    ui->menuListWidget->setCurrentRow(0);
 
     ui->menuLabel->setText(selectedMenuItem);
 }
 
-//??
+//mainMenu button slot
 void MainWindow::navigateToMainMenu() {
 
-    if (currentTimerCount != -1) {
-        //Save record
+    //handle session interuption
+    if (currentTimerCount != 0) {
+        //Save record and end session
         if (currentMenu->getName() == "START NEW SESSION") {
-            records.last()->setDuration((currentSession->getTime())-currentTimerCount);
-    
-            //database->addRecord(records.last()->getTreatment(),records.last()->getStartTime(),recordings.last()->getPowerLevel(),recordings.last()->getDuration());
+            endSession();
         }
-
-        //allRecords += records.last()->toString();
-
-        //End session
-        currentTimerCount = -1;
-        currentSession->getTimer()->stop();
-        currentSession->getTimer()->disconnect();
-        currentSession = nullptr;
     }
 
+    //loop until return the main menu
     while (currentMenu->getName() != "MAIN MENU") {
         currentMenu = currentMenu->getParentMenu();
     }
 
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
-    ui->senssionViewWidget->setVisible(false);
-    ui->sensorLabel->setVisible(false);
+    ui->stackedWidget->setVisible(false);
+    ui->contact->setVisible(false);
 }
 
 
 void MainWindow::navigateBack() {
+    // needed?
+    //ui->leftButton->blockSignals(true);
+    //ui->rightButton->blockSignals(true);
 
-    ui->rightButton->blockSignals(true);
-    ui->leftButton->blockSignals(true);
-
-    if (currentTimerCount != -1) {
+    //handle session interuption
+    if (currentTimerCount != 0) {
         //Save record
         if (currentMenu->getName() == "START NEW SESSION") {
-            records.last()->setDuration((currentSession->getTime())-currentTimerCount);
-            //db->addRecord(recordings.last()->getStartTime(),records.last()->getChallengeLevel(),recordings.last()->getDuration());
+            endSession();
         }
-
-        //allRecords += records.last()->toString();
-
-        //Stop session
-        currentTimerCount = -1;
-        currentSession->getTimer()->stop();
-        currentSession->getTimer()->disconnect();
-        currentSession = nullptr;
     }
 
     if (currentMenu->getName() == "MAIN MENU") {
-        activeQListWidget->setCurrentRow(0);
+        ui->menuListWidget->setCurrentRow(0);
     }
     else {
         currentMenu = currentMenu->getParentMenu();
         updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     }
 
-    ui->sessionViewWidget->setVisible(false);
-    ui->sensorLabel->setVisible(false);
+    ui->stackedWidget->setVisible(false);
+    ui->contact->setVisible(false);
 }
 
 
 void MainWindow::parameterPlus() {
     int index = activeQListWidget->currentRow();
-    int currentChallengeLevel = setting->getChallengeLevel();
+    //int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
     if (currentMenu->getName() == "SETTING"){
-        if (index == 0 && currentChallengeLevel <=3){
-            currentChallengeLevel = setting->setChallengeLevel(currentChallengeLevel + 1);
-            activeQListWidget.item(index).setText("CHALLENGE LEVEL: " + QString::number(currentChallengeLevel));
-                
-        }else if (index == 1 && currentBpInterval <=29){
+        if (index == 1 && currentBpInterval <=29){
             currentBpInterval = setting->setBpInterval(currentBpInterval+1);
             activeQListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
         }
@@ -462,18 +484,14 @@ void MainWindow::parameterPlus() {
 
 void MainWindow::parameterMinus() {
 
-    int index = activeQListWidget->currentRow();
-    int currentChallengeLevel = setting->getChallengeLevel();
+    int index = ui->menuListWidget->currentRow();
+    //int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
     if (currentMenu->getName() == "SETTING"){
-        if (index == 0 && currentChallengeLevel >1){
-            currentChallengeLevel = setting->setChallengeLevel(currentChallengeLevel - 1);
-            activeQListWidget.item(index).setText("CHALLENGE LEVEL: " + QString::number(currentChallengeLevel));
-                
-        }else if (index == 1 && currentBpInterval >1){
+        if (index == 1 && currentBpInterval >1){
             currentBpInterval = setting->setBpInterval(currentBpInterval-1);
-            activeQListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+            ui->menuListWidget.item(index).setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
         }
     }
 }
@@ -518,11 +536,11 @@ void MainWindow::consumeBattery(double consumption) {
     changeBatteryCapacity(currentBattery - consumption);
 }
 
-void MainWindow::changeChallengeLevel(int level) {
+//void MainWindow::changeChallengeLevel(int level) {
 
-    setting->setChallengeLevel(level);
-    ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
-}
+    //setting->setChallengeLevel(level);
+    //ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
+//}
 
 void MainWindow::plot() {
     QVector<QPointF>* points = currentSession->getHRVData();
@@ -542,6 +560,29 @@ void MainWindow::plot() {
     ui->sessionGraph->xAxis->setRange(0, 124);
     ui->sessionGraph->yAxis->setRange(55, 105);
     ui->sessionGraph->replot();
+}
+
+//??
+void MainWindow::plotHistory(Record* record) {
+    QVector<QPointF> points = record->getHrvGraph();
+
+    int size = points.size();
+    double previousX = 0;
+    QVector<double> x(size), y(size);
+    for (int i=0; i<size; i++) {
+      x[i] = points[i].x() + previousX;
+      y[i] = points[i].y();
+      previousX = x[i];
+      qInfo() << x[i] << "|" << y[i];
+    }
+
+    ui->historyGraph->QCustomPlot::addGraph();
+    ui->historyGraph->graph(0)->setData(x, y);
+    ui->historyGraph->xAxis->setLabel("Time");
+    ui->historyGraph->yAxis->setLabel("HR");
+    ui->historyGraph->xAxis->setRange(0, 124);
+    ui->historyGraph->yAxis->setRange(55, 105);
+    ui->historyGraph->replot();
 }
 
 //void MainWindow::plot(QVector<QPointF>** points) {

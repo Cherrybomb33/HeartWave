@@ -116,7 +116,7 @@ bool DBController::getRecord(const QDateTime& time, Record** record){
         }
 
         // Create a new Record object with the extracted values
-        *record = new Record(datetime, challengeLevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph);
+        *record = new Record(datetime, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph);
 
         return true;
     } else {

@@ -39,3 +39,7 @@ double Record::getHighPercentage() { return highPercentage; }
 double Record::getAverageCoherence() { return averageCoherence; }
 int Record::getLength(){return length;}
 double Record::getAchievementScore(){return achievementScore;}
+
+QVector<QPointF> Record::getHrvGraph() const {
+    return hrvGraph;
+}
