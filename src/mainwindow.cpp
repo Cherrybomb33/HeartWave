@@ -10,12 +10,6 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
     ui->setupUi(this);
 
     setupConnections();
-
-    currentTimerCount = 0;
-    bpProgress = 0;
-    bpIsIncreasing = true;
-    currentBattery = 100.0;
-    currentSession = nullptr;
 }
 
 //destructor
@@ -33,6 +27,12 @@ MainWindow::~MainWindow() {
 void MainWindow::setupConnections(){
     // Initialize timer counter
     //currentTimerCount = -1;  0 or -1?
+
+    currentTimerCount = 0;
+    bpProgress = 0;
+    bpIsIncreasing = true;
+    currentBattery = 100.0;
+    currentSession = nullptr;
 
     //set initial sensor status
     sensorOn = false;
@@ -96,7 +96,6 @@ void MainWindow::initializeMenu(Menu* menu) {
     //create submenu options of setting
     settingList.append("RESET");
     settingList.append("BREATH PACER INTERVAL");
-
 
     //create submenu options of history
     historyList = database.getHistory();
@@ -254,9 +253,9 @@ void MainWindow::changePowerStatus() {
 
     ui->menuListWidget->setVisible(powerOn);
     ui->menuLabel->setVisible(powerOn);
-    ui->statusBarQFrame->setVisible(powerOn);   //display battery level and sensor detector
+    ui->status->setVisible(powerOn);   //display battery level and sensor detector
     ui->stackedWidget->setVisible(powerOn);
-    ui->sessionViewWidget->setVisible(powerOn);
+    //ui->sessionViewWidget->setVisible(powerOn);
 
     //Remove this if we want the menu to stay in the same position when the power is off
     if (powerOn) {
@@ -278,26 +277,18 @@ void MainWindow::changePowerStatus() {
 
 //set power on/off state
 void MainWindow::powerSwitch() {
-    //??getBattery() not ready, should getBattery() in Setting?
     if (currentBattery > 0) {
         powerOn  = !powerOn;
         changePowerStatus();
     }
 
     //handle poweroff event during session measurement  ??
-    if (currentTimerCount != -1) {
-        //Save Record
+    if (currentTimerCount != 0) {
+        //Save Record and end session
         if (currentMenu->getName() == "Session") {
-            //records.last()->setDuration((currentTherapy->getTime())-currentTimerCount);
-            currentSession->saveRecord();
-            //database->addRecord(records.last()->getTreatment(),records.last()->getStartTime(),records.last()->getPowerLevel(),records.last()->getDuration());
+            endSession();
         }
 
-        //allRecords += records.last()->toString();
-        //Stop session
-        currentTimerCount = -1;
-        currentSession->getTimer()->stop();
-        currentSession->getTimer()->disconnect();
         activateSensor(false);
     }
 }
