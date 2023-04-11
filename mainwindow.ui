@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -680,7 +680,7 @@ background-color:rgb(239, 41, 41);
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#4e9a06;&quot;&gt;High:&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QLabel" name="avgSore">
+     <widget class="QLabel" name="avgScore">
       <property name="geometry">
        <rect>
         <x>520</x>
@@ -800,7 +800,7 @@ background-color:rgb(239, 41, 41);
        <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; color:#4e9a06;&quot;&gt;0.0%&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
-     <widget class="QLabel" name="avgLabel_2">
+     <widget class="QLabel" name="dateLabel">
       <property name="geometry">
        <rect>
         <x>410</x>
@@ -821,7 +821,7 @@ background-color:rgb(239, 41, 41);
        <string>Date:</string>
       </property>
      </widget>
-     <widget class="QLabel" name="avgSore_2">
+     <widget class="QLabel" name="date">
       <property name="geometry">
        <rect>
         <x>460</x>

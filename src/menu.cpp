@@ -2,7 +2,7 @@
 
 //Constructor that creates a new Menu object
 Menu::Menu(QString name, QStringList menuOptions, Menu* parentMenu)
-    : name(name), menuOptions(menuOptions), parent(parentMenu)
+    : name(name), menuOptions(menuOptions), parentMenu(parentMenu)
 {
     position = -1;
 }

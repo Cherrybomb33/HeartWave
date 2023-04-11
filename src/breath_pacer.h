@@ -1,4 +1,4 @@
-#include <QtWidgets>
+/*#include <QtWidgets>
 
 void createBreathPacer(QGraphicsScene* scene, int x, int y, int diameter, int duration)
 {
@@ -10,7 +10,7 @@ void createBreathPacer(QGraphicsScene* scene, int x, int y, int diameter, int du
     ellipseItem->setOpacity(0.5);
 
     // Create a horizontal animation for the ellipse item
-    QPropertyAnimation* animation = new QPropertyAnimation(ellipseItem, "pos");
+    //QPropertyAnimation* animation = new QPropertyAnimation(ellipseItem, "pos");
     animation->setDuration(duration * 1000);
     animation->setLoopCount(-1);
     animation->setStartValue(QPointF(x, y));
@@ -37,4 +37,4 @@ int main(int argc, char *argv[])
     createBreathPacer(&scene, 50, 100, 30, 10);
 
     return app.exec();
-}
+}*/

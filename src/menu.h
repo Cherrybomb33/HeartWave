@@ -13,6 +13,7 @@ public:
     explicit Menu(QString, QStringList, Menu*);  
     ~Menu();  //Destructor that destroys the Menu object and any sub-menu objects that it contains
 
+    //getters and setters
     QString getName();   //return the name of the menu
     QStringList getMenuOptions();   //return the list of submenu titles
     Menu* getParentMenu();   //return a pointer to the parent menu
