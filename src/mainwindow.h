@@ -38,7 +38,7 @@ private:
     Menu* mainMenu;  //the original main menu node, need this in order to delete without memory leaks
 
     Ui::MainWindow *ui;   //A ui pointer for the UI in mainwindow
-    QListWidget *activeQListWidget;    //A widget for displaying the menus
+    //QListWidget *activeQListWidget;    //A widget for displaying the menus
 
     //QVector<Session*> sessions;  //a vector holding the session objects
     QVector<Record*> records;   //a vector holding the record objects
@@ -61,7 +61,8 @@ private:
     void setupConnections();
     void updateMenu(const QString, const QStringList);
     void initializeMenu(Menu*);   //Dynamically allocate all the menu objects
-    void initializeSessions();   //Dynamically allocate all the sessions
+    void initializeHistory();
+    //void initializeSessions();   //Dynamically allocate all the sessions
     //void initializeTimer(QTimer*);   //Initalize the timer
     void startSession();  //Display the session page, and initialize data to run the session if user click the sensorOn button
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
@@ -70,6 +71,7 @@ private:
 //    QVector<QPointF>* calPoints(QVector<double>** times);
     void updateSession();
     void plot();
+    void plotHstory(Record *Record);
     void displayReview(Record *newRecord);
     void updateBP(int interval);
     void endSession();
@@ -77,7 +79,7 @@ private:
     void changeBatteryCapacity(double capacity);
 private slots:
     void powerSwitch();   //set power on/off state
-    void rechargeBattery();  //Change the currentPowerLevel to 100
+    void chargeBattery();  //Change the currentPowerLevel to 100
 
     void navigateDownMenu();   //Navigate down on a menu
     void navigateUpMenu();    //Navigate up on a menu
