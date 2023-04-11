@@ -139,8 +139,8 @@ void MainWindow::startSession() {
         sessionTimer->start(1000);
     }
 
-    //Power Buttons and left and right buttons are blocked
-    ui->powerButton->blockSignals(true);
+    //Left and right buttons are blocked
+    // enable buttons after ends!!!!!!!!!!!!
     ui->rightButton->blockSignals(true);
     ui->leftButton->blockSignals(true);
 }
@@ -171,22 +171,23 @@ void MainWindow::updateSession() {
 }
 
 void MainWindow::endSession() {
+    currentSession->getTimer()->stop();
+    currentSession->getTimer()->disconnect();
     currentTimerCount = 0;
     bpProgress = 0;
     bpIsIncreasing = true;
     Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
                                    currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                                   currentSession->getAchievementScore()/currentSession->getLength(),
+                                   currentSession->getAchievementScore()*5/currentSession->getLength(),
                                    currentSession->getAchievementScore(), *(currentSession->getHRVData()));
     records.push_back(newRecord);
 
+    //currentDateTime to startDateTime
     database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                        currentSession->getAchievementScore()/currentSession->getLength(),
+                        currentSession->getAchievementScore()*5/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
 
-    currentSession->getTimer()->stop();
-    currentSession->getTimer()->disconnect();
     delete currentSession;
     currentSession = nullptr;
     displayReview(newRecord);

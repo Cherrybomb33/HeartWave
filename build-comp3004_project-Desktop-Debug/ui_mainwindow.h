@@ -276,6 +276,7 @@ public:
         bp = new QProgressBar(sessionView);
         bp->setObjectName(QString::fromUtf8("bp"));
         bp->setGeometry(QRect(120, 220, 381, 20));
+        bp->setStyleSheet(QString::fromUtf8("QProgressBar { border: none; }"));
         bp->setValue(24);
         sessionGraph = new QCustomPlot(sessionView);
         sessionGraph->setObjectName(QString::fromUtf8("sessionGraph"));
@@ -426,7 +427,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);
