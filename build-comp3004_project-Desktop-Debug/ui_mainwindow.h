@@ -101,11 +101,11 @@ public:
         centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
         powerOffView = new QGraphicsView(centralwidget);
         powerOffView->setObjectName(QString::fromUtf8("powerOffView"));
-        powerOffView->setGeometry(QRect(10, 40, 600, 300));
+        powerOffView->setGeometry(QRect(10, 40, 600, 310));
         powerOffView->setStyleSheet(QString::fromUtf8("background-color:rgb(0, 0, 0);"));
         menuListWidget = new QListWidget(centralwidget);
         menuListWidget->setObjectName(QString::fromUtf8("menuListWidget"));
-        menuListWidget->setGeometry(QRect(10, 65, 600, 275));
+        menuListWidget->setGeometry(QRect(10, 85, 600, 265));
         status = new QFrame(centralwidget);
         status->setObjectName(QString::fromUtf8("status"));
         status->setGeometry(QRect(10, 40, 600, 25));
@@ -236,7 +236,7 @@ public:
 "}"));
         stackedWidget = new QStackedWidget(centralwidget);
         stackedWidget->setObjectName(QString::fromUtf8("stackedWidget"));
-        stackedWidget->setGeometry(QRect(10, 90, 601, 261));
+        stackedWidget->setGeometry(QRect(10, 90, 600, 260));
         QFont font1;
         font1.setPointSize(8);
         stackedWidget->setFont(font1);
@@ -277,7 +277,7 @@ public:
         bp->setObjectName(QString::fromUtf8("bp"));
         bp->setGeometry(QRect(120, 220, 381, 20));
         bp->setStyleSheet(QString::fromUtf8("QProgressBar { border: none; }"));
-        bp->setValue(24);
+        bp->setValue(0);
         sessionGraph = new QCustomPlot(sessionView);
         sessionGraph->setObjectName(QString::fromUtf8("sessionGraph"));
         sessionGraph->setGeometry(QRect(100, 60, 411, 151));
@@ -369,13 +369,14 @@ public:
         stackedWidget->addWidget(historyView);
         menuLabel = new QLabel(centralwidget);
         menuLabel->setObjectName(QString::fromUtf8("menuLabel"));
-        menuLabel->setGeometry(QRect(10, 70, 601, 20));
+        menuLabel->setGeometry(QRect(10, 65, 601, 20));
         QFont font7;
         font7.setFamily(QString::fromUtf8("System-ui"));
         font7.setPointSize(11);
         font7.setBold(true);
         font7.setWeight(75);
         menuLabel->setFont(font7);
+        menuLabel->setStyleSheet(QString::fromUtf8("background-color: rgb(255, 255, 255);"));
         sensorButton = new QPushButton(centralwidget);
         sensorButton->setObjectName(QString::fromUtf8("sensorButton"));
         sensorButton->setGeometry(QRect(20, 560, 51, 51));
@@ -427,7 +428,7 @@ public:
 
         retranslateUi(MainWindow);
 
-        stackedWidget->setCurrentIndex(1);
+        stackedWidget->setCurrentIndex(0);
 
 
         QMetaObject::connectSlotsByName(MainWindow);

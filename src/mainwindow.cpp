@@ -32,6 +32,7 @@ void MainWindow::setupConnections(){
     bpIsIncreasing = true;
     currentBattery = 100.0;
     currentSession = nullptr;
+    setting = new Setting();
 
     //set initial sensor status
     sensorOn = false;
@@ -68,7 +69,8 @@ void MainWindow::setupConnections(){
     connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
     connect(ui->rightButton, &QPushButton::pressed, this, &MainWindow::parameterPlus);
     connect(ui->leftButton, &QPushButton::pressed, this, &MainWindow::parameterMinus);
-    connect(ui->sensorButton, &QPushButton::clicked, this, QOverload<bool>::of(&MainWindow::activateSensor));
+//    connect(ui->sensorButton, &QPushButton::clicked, this, QOverload<bool>::of(&MainWindow::activateSensor));  //this one is replaced by the next line
+    connect(ui->sensorButton, &QPushButton::clicked, [this]() {activateSensor(!sensorOn);});
 
     // prevent signals from being emitted(send signals only for BP interval setting interaction)
     ui->leftButton->blockSignals(true);
@@ -142,6 +144,7 @@ void MainWindow::startSession() {
     //ui->sessionView->setVisible(true);
     ui->stackedWidget->setVisible(true);
     ui->stackedWidget->setCurrentIndex(0);   //session page
+    plot(); //generate initial empty plot
 
     //Connect timer to update all session data
     QTimer* sessionTimer = currentSession->getTimer();
@@ -185,6 +188,7 @@ void MainWindow::updateSession() {
 void MainWindow::endSession() {
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
+    currentSession->calCLPercentage();
     currentTimerCount = -1;
     bpProgress = 0;
     bpIsIncreasing = true;
@@ -360,13 +364,13 @@ void MainWindow::navigateSubMenu() {
         MainWindow::updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
 
      //If the menu is not a parent and clicking on it starts a session
-    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "START NEW SESSION") {
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
         //Update new menu info
         currentMenu = currentMenu->get(index);
         MainWindow::updateMenu("Measuring", {});
         MainWindow::startSession();
 
-    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->getName() == "DELETE") {
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "DELETE") {
         //currentMenu = currentMenu->get(index);
         QString datatimeString = currentMenu->getParentMenu()->getName().left(19); //get datetime Qstring
         QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
@@ -414,6 +418,7 @@ void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList me
 void MainWindow::navigateToMainMenu() {
 
     //handle session interuption
+    // ??cannot display review
     if (currentTimerCount != 0) {
         //Save record and end session
         if (currentMenu->getName() == "START NEW SESSION") {
@@ -438,7 +443,8 @@ void MainWindow::navigateBack() {
     //ui->rightButton->blockSignals(true);
 
     //handle session interuption
-    if (currentTimerCount != 0) {
+    // ??cannot display review
+    if (currentTimerCount != -1) {
         //Save record
         if (currentMenu->getName() == "START NEW SESSION") {
             endSession();
@@ -508,7 +514,7 @@ void MainWindow::activateSensor(bool checked) {
 
     if (currentTimerCount != -1) {
         if (!sensorOn) {
-            currentSession->getTimer()->stop();
+            endSession();
         }
         else {
             currentSession->getTimer()->start(1000);
@@ -541,13 +547,13 @@ void MainWindow::plot() {
       x[i] = points->at(i).x() + previousX;
       y[i] = points->at(i).y();
       previousX = x[i];
-      qInfo() << x[i] << "|" << y[i];
+//      qInfo() << x[i] << "|" << y[i];
     }
     ui->sessionGraph->QCustomPlot::addGraph();
     ui->sessionGraph->graph(0)->setData(x, y);
     ui->sessionGraph->xAxis->setLabel("Time");
     ui->sessionGraph->yAxis->setLabel("HR");
-    ui->sessionGraph->xAxis->setRange(0, 124);
+    ui->sessionGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->sessionGraph->yAxis->setRange(55, 105);
     ui->sessionGraph->replot();
 }
@@ -563,14 +569,13 @@ void MainWindow::plotHistory(Record* record) {
       x[i] = points[i].x() + previousX;
       y[i] = points[i].y();
       previousX = x[i];
-      qInfo() << x[i] << "|" << y[i];
     }
 
     ui->historyGraph->QCustomPlot::addGraph();
     ui->historyGraph->graph(0)->setData(x, y);
     ui->historyGraph->xAxis->setLabel("Time");
     ui->historyGraph->yAxis->setLabel("HR");
-    ui->historyGraph->xAxis->setRange(0, 124);
+    ui->historyGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->historyGraph->yAxis->setRange(55, 105);
     ui->historyGraph->replot();
 }

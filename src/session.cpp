@@ -92,9 +92,9 @@ QVector<double>* Session::simulateHeartIntervals(double timeLimit) {
 void Session::calCLPercentage() {
     int totalCount = lowCount + mediumCount + highCount;
     if (totalCount != 0) {
-        lowPercentage = lowCount / (double)totalCount;
-        mediumPercentage = mediumCount / (double)totalCount;
-        highPercentage = highCount / (double)totalCount;
+        lowPercentage = lowCount * 100 / (double)totalCount;
+        mediumPercentage = mediumCount * 100 / (double)totalCount;
+        highPercentage = highCount * 100 / (double)totalCount;
     }
 }
 

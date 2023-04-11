@@ -17,7 +17,7 @@
 #include "setting.h"
 #include "record.h"
 
-#define MAX_SESSION_DURATION 120
+#define MAX_SESSION_DURATION 30
 
 namespace Ui {
 class MainWindow;
