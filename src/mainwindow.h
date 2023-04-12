@@ -17,7 +17,7 @@
 #include "setting.h"
 #include "record.h"
 
-#define MAX_SESSION_DURATION 30
+#define MAX_SESSION_DURATION 120
 
 namespace Ui {
 class MainWindow;
@@ -29,9 +29,6 @@ class MainWindow : public QMainWindow {
 public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
-
-//    void plot(QVector<QPointF> **points); //Plot the HRV graph based on points parameter
-//    void addPlot(QVector<QPointF> **points);//Add more points to the HRV graph based on points parameter
 
 private:
     Menu* currentMenu;  //the current node of the menu tree that the user is on
@@ -68,7 +65,6 @@ private:
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
     void consumeBattery(double consumption);  //Contains an equation of how much to drain the battery by then calling another function to change it
 
-//    QVector<QPointF>* calPoints(QVector<double>** times);
     void updateSession();
     void plot();
     void plotHistory(Record *Record);
@@ -93,7 +89,6 @@ private slots:
     void activateSensor(bool);   //Start/stop the session timer if they are on a measurement session
     void activateSensor(int);  //Start/stop the session from the admin panel
 
-//    void another5Sec(); //Generato another 5 seconds data and add it to the plot
     void sessionTimerSlot();
 };
 

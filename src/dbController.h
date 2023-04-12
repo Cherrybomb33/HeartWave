@@ -14,8 +14,6 @@
 #include <QList>
 #include <QApplication>
 #include <QPropertyAnimation>
-#include "record.h"
-
 
 //Manages interactions between application and database
 class DBController {

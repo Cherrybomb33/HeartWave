@@ -40,6 +40,9 @@ void MainWindow::setupConnections(){
     //create database connection
     database = new DBController();
 
+    //Load records from the database
+    initializeHistory();
+
     //create menu tree
     currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
     mainMenu = currentMenu;
@@ -87,25 +90,18 @@ void MainWindow::setupConnections(){
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
-    
-    //Load records from the database
-    initializeHistory();
 }
 
 void MainWindow::initializeMenu(Menu* menu) {
     QStringList settingList;
-    QStringList historyList;
 
     //create submenu options of setting
     settingList.append("RESET");
     settingList.append("BREATH PACER INTERVAL:  10");
 
     //create submenu options of history
-    historyList = database->getHistory();
-    //qDebug() << historyList;
-    
     Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
-    Menu* historyMenu = new Menu("HISTORY", historyList, menu);
+    Menu* historyMenu = new Menu("HISTORY", allRecords, menu);
     Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
 
     menu->addChildMenu(sessionMenu);
@@ -117,7 +113,7 @@ void MainWindow::initializeMenu(Menu* menu) {
     settingMenu->addChildMenu(resetMenu);
 
     //create menus and submenus for each record in historyMenu
-    for (const QString &str : historyList) {
+    for (const QString &str : allRecords) {
         //set "yyyy-MM-dd hh:mm:ss" part as the menu name
         Menu* record = new Menu(str.left(19), {"VIEW", "DELETE"}, historyMenu);
         record->addChildMenu(new Menu("VIEW",{}, record));
@@ -167,7 +163,7 @@ void MainWindow::startSession() {
 void MainWindow::sessionTimerSlot() {
     currentTimerCount++;
     // change length in sessionView and update breath pacer every 1 second
-    ui->lengthValue->setNum(currentTimerCount);
+    ui->lengthValue->setText(QString("%1:%2").arg(QString::number(currentTimerCount / 60),2,'0').arg(QString::number(currentTimerCount % 60),2,'0'));
     updateBP(setting->getBpInterval());
     // update session data every 5 seconds
     if (currentTimerCount % 5 == 0 && currentBattery > 0) {
@@ -192,11 +188,6 @@ void MainWindow::endSession() {
     currentSession->getTimer()->disconnect();
     currentSession->calCLPercentage();
 
-    currentTimerCount = -1;
-    sensorOn = false;
-    bpProgress = 0;
-    bpIsIncreasing = true;
-
     //to fill up enough data according to the actual running time
     if (currentTimerCount > currentSession->getLength()) {
         QVector<double>* newDoubles = currentSession->simulateHeartIntervals(currentTimerCount - currentSession->getLength());
@@ -215,7 +206,21 @@ void MainWindow::endSession() {
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                         (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+
+    // add new menu option to the history tab after a session ends
+    Menu* historyMenu = mainMenu->get(1);
+    Menu* newHistoryRecord = new Menu(currentSession->getStartTime().toString("yyyy-MM-dd HH:mm:ss"), {"VIEW", "DELETE"}, historyMenu);
+    newHistoryRecord->addChildMenu(new Menu("VIEW",{}, newHistoryRecord));
+    newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
+    historyMenu->addChildMenu(newHistoryRecord);
+    QString newRecordString = newHistoryRecord->getName() + "\n"
+        + "   Length: " + QString::number(currentTimerCount / 60)
+        + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
+    allRecords.push_back(newRecordString);
+    historyMenu->setMenuOptions(allRecords);
+
     currentTimerCount = -1;
+    sensorOn = false;
     bpProgress = 0;
     bpIsIncreasing = true;
     ui->bp->setValue(0);
@@ -230,15 +235,15 @@ void MainWindow::endSession() {
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
-    ui->coherenceValue->setNum(0.0);
+    ui->coherenceValue->setText("0.00");
     ui->lengthValue->setText("00:00");
-    ui->achievementScore->setNum(0.0);
+    ui->achievementScore->setText("0.00");
     displayReview(newRecord);
 }
 
 void MainWindow::updateSessionView() {
-    ui->coherenceValue->setNum(currentSession->getCoherenceScore());
-    ui->achievementScore->setNum(currentSession->getAchievementScore());
+    ui->coherenceValue->setText(QString::number(currentSession->getCoherenceScore(),'f',2));
+    ui->achievementScore->setText(QString::number(currentSession->getAchievementScore(),'f',2));
     int coherenceLevel = currentSession->getCoherenceLevel();
     switch(coherenceLevel) {
         case 0 :
@@ -384,34 +389,14 @@ void MainWindow::navigateSubMenu() {
 
             database->reset();
             setting->reset();
-            navigateBack();
 
-            //reset history menu
-            currentMenu->getParentMenu()->get(1)->deleteAllSubMenus();
-            //create submenu options of history
-            QStringList historyList = database->getHistory();
-            currentMenu->getParentMenu()->get(1)->setMenuOptions(historyList);
-
-            //create menus and submenus for each record in historyMenu
-            for (const QString &str : historyList) {
-                //set "yyyy-MM-dd hh:mm:ss" part as the menu name
-                Menu* record = new Menu(str.left(19), {"VIEW", "DELETE"}, currentMenu->getParentMenu()->get(1));
-                record->addChildMenu(new Menu("VIEW",{}, record));
-                record->addChildMenu(new Menu("DELETE", {}, record));
-                currentMenu->getParentMenu()->get(1)->addChildMenu(record);
-            }
-
+            // delete original main menu object and regenerate a new menu object for resetting, then navigate to main menu
+            mainMenu->deleteAllSubMenus();
             initializeHistory();
-
-            //update bpsetting display
-            QStringList settingList;
-            settingList.append("RESET");
-            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
-
-            ui->menuListWidget->clear();
-            ui->menuListWidget->addItems(settingList);
-            ui->menuListWidget->setCurrentRow(0);
-            currentMenu->setMenuOptions(settingList);
+            currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
+            mainMenu = currentMenu;
+            initializeMenu(currentMenu);
+            navigateToMainMenu();
 
             return;
         }
@@ -457,21 +442,33 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
+//        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+//        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+//        //qDebug() << "Menu: " + datetimeString;
+//        currentMenu = currentMenu->get(index);
+//        updateMenu("Record", {});
+//        for (Record* record : records) {
+//            if (record->getStartTime() == datetime) {
+//                displayReview(record);
+//                return;
+//            }
+//        }
         QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
-        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
-        //qDebug() << "Menu: " + datetimeString;
         currentMenu = currentMenu->get(index);
         updateMenu("Record", {});
-
         for (Record* record : records) {
-            if (record->getStartTime() == datetime) {
+            if (record->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) { // compare menu string to every record's QDateTime string
                 displayReview(record);
                 return;
             }
         }
 
-        qDebug() << "No matching record found.";
+        qDebug() << "No matching record found";
+
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "HISTORY") {
+        qDebug() << "No history records available";
     }
+
 }
 
 void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
@@ -498,9 +495,10 @@ void MainWindow::navigateToMainMenu() {
     }
 
     //loop until return the main menu
-    while (currentMenu->getName() != "MAIN MENU") {
-        currentMenu = currentMenu->getParentMenu();
-    }
+//    while (currentMenu->getName() != "MAIN MENU") {
+//        currentMenu = currentMenu->getParentMenu();
+//    }
+    currentMenu = mainMenu;
 
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     ui->stackedWidget->setVisible(false);
@@ -649,8 +647,8 @@ void MainWindow::plot() {
     }
     ui->sessionGraph->QCustomPlot::addGraph();
     ui->sessionGraph->graph(0)->setData(x, y);
-    ui->sessionGraph->xAxis->setLabel("Time");
-    ui->sessionGraph->yAxis->setLabel("HR");
+    ui->sessionGraph->xAxis->setLabel("Time (s)");
+    ui->sessionGraph->yAxis->setLabel("HR (bps)");
     ui->sessionGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->sessionGraph->yAxis->setRange(55, 105);
     ui->sessionGraph->replot();
@@ -671,50 +669,12 @@ void MainWindow::plotHistory(Record* record) {
 
     ui->historyGraph->QCustomPlot::addGraph();
     ui->historyGraph->graph(0)->setData(x, y);
-    ui->historyGraph->xAxis->setLabel("Time");
-    ui->historyGraph->yAxis->setLabel("HR");
+    ui->sessionGraph->xAxis->setLabel("Time (s)");
+    ui->sessionGraph->yAxis->setLabel("HR (bps)");
     ui->historyGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->historyGraph->yAxis->setRange(55, 105);
     ui->historyGraph->replot();
 }
-
-//void MainWindow::plot(QVector<QPointF>** points) {
-//    int size = (*points)->size();
-//    QVector<double> x(size), y(size);
-//    for (int i=0; i<size; i++) {
-//      x[i] = (*points)->at(i).x() + previousX;
-//      y[i] = (*points)->at(i).y();
-//      previousX = x[i];
-//      qInfo() << x[i] << "|" << y[i];
-//    }
-//    ui->hrvGraph->QCustomPlot::addGraph();
-//    ui->hrvGraph->graph(0)->setData(x, y);
-//    ui->hrvGraph->xAxis->setLabel("Time");
-//    ui->hrvGraph->yAxis->setLabel("HR");
-//    ui->hrvGraph->xAxis->setRange(0, 124);
-//    ui->hrvGraph->yAxis->setRange(55, 105);
-//    ui->hrvGraph->replot();
-//}
-
-//void MainWindow::addPlot(QVector<QPointF>** points) {
-//    int size = (*points)->size();
-//    QVector<double> x(size), y(size);
-//    for (int i=0; i<size; i++) {
-//      x[i] = (*points)->at(i).x() + previousX;
-//      y[i] = (*points)->at(i).y();
-//      previousX = x[i];
-//      qInfo()<< "????" << x[i] << "|" << y[i];
-//    }
-//    ui->hrvGraph->graph(0)->addData(x,y);
-//    ui->hrvGraph->replot();
-//}
-
-//void MainWindow::another5Sec()
-//{
-//    QVector<double>* points = currentSession->simulateHeartIntervals(5);
-//    QVector<QPointF>* tests = calPoints(&points);
-//    addPlot(&tests);
-//}
 
 void MainWindow::updateBP(int interval) {
     if (bpIsIncreasing) {
@@ -730,12 +690,3 @@ void MainWindow::updateBP(int interval) {
     }
     ui->bp->setValue(bpProgress);
 }
-
-//QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {
-//    QVector<QPointF>* points = new QVector<QPointF>();
-//    for (int i = 0;i < (*times)->size();i++) {
-//        QPointF newPoint((*times)->at(i),60/(*times)->at(i));
-//        points->push_back(newPoint);
-//    }
-//    return points;
-//}
