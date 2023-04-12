@@ -372,6 +372,7 @@ void MainWindow::navigateSubMenu() {
 
     int index = ui->menuListWidget->currentRow();
     if (index < 0) return;
+    if (currentMenu->getName() == "SETTINGS" && index==1){return;} //handle when user presses select button during BPInterval setting scenario
 
     //when the menu is the reset menu
     if (currentMenu->getName() == "RESET") {
@@ -448,6 +449,7 @@ void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList me
     ui->menuListWidget->setCurrentRow(0);
 
     ui->menuLabel->setText(selectedMenuItem);
+    ui->menuLabel->setStyleSheet("QLabel { font-weight: 600; color: #e9b96e; qproperty-alignment: 'AlignHCenter | AlignVCenter'; background-color: white;}");
 }
 
 //mainMenu button slot
@@ -507,12 +509,21 @@ void MainWindow::parameterPlus() {
     //int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
-    if (currentMenu->getName() == "SETTING"){
+    if (currentMenu->getName() == "SETTINGS"){
         if (index == 1 && currentBpInterval <=29){
             setting->setBpInterval(currentBpInterval+1);
-            qDebug() << currentBpInterval;
-            currentMenu->get(index)->setName("BREATH PACER INTERVAL: " + (QString::number(currentBpInterval)));
+            //currentMenu->get(index)->setName("BREATH PACER INTERVAL: " + (QString::number(currentBpInterval)));
             //ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+
+            QStringList settingList;
+            settingList.append("RESET");
+            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+
+            ui->menuListWidget->clear();
+            ui->menuListWidget->addItems(settingList);
+            ui->menuListWidget->setCurrentRow(1);
+            ui->menuLabel->setText(currentMenu->getName());
+            currentMenu->setMenuOptions(settingList);
         }
     }
 }
@@ -524,10 +535,20 @@ void MainWindow::parameterMinus() {
     //int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
-    if (currentMenu->getName() == "SETTING"){
+    if (currentMenu->getName() == "SETTINGS"){
         if (index == 1 && currentBpInterval >1){
             setting->setBpInterval(currentBpInterval-1);
-            ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+            //ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+
+            QStringList settingList;
+            settingList.append("RESET");
+            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+
+            ui->menuListWidget->clear();
+            ui->menuListWidget->addItems(settingList);
+            ui->menuListWidget->setCurrentRow(1);
+            ui->menuLabel->setText(currentMenu->getName());
+            currentMenu->setMenuOptions(settingList);
         }
     }
 }
