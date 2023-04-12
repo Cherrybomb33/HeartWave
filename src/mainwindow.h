@@ -77,6 +77,7 @@ private:
     void endSession();
     void updateSessionView();
     void changeBatteryCapacity(double capacity);
+
 private slots:
     void powerSwitch();   //set power on/off state
     void chargeBattery();  //Change the currentPowerLevel to 100
