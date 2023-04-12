@@ -278,6 +278,7 @@ public:
         bp->setGeometry(QRect(120, 220, 381, 20));
         bp->setStyleSheet(QString::fromUtf8("QProgressBar { border: none; }"));
         bp->setValue(0);
+        bp->setTextVisible(false);
         sessionGraph = new QCustomPlot(sessionView);
         sessionGraph->setObjectName(QString::fromUtf8("sessionGraph"));
         sessionGraph->setGeometry(QRect(100, 60, 411, 151));

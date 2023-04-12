@@ -9,6 +9,7 @@
 #include <random>
 #include <time.h>
 #include <QPointF>
+#include <QDebug>
 
 
 using namespace std;
@@ -22,6 +23,7 @@ class Session: public QObject {
         Session(); // constructor to create a new session object
         ~Session(); // destructor to clean up memory used by the session object
 
+        QDateTime getStartTime();
         double getLength();            // getter function to return the length of the session
         QTimer* getTimer();
         double getCoherenceScore();    // getter function to return the coherence score
@@ -37,6 +39,7 @@ class Session: public QObject {
         void setHRContact(bool);       // setter function to set whether HR contact is on
 
         QVector<double>* simulateHeartIntervals(double timeLimit);   //generate random heart beat intervals up to the limit
+        QVector<QPointF> *calPoints(QVector<double> **times);
         void calCLPercentage();  // calculate percentage of time in different coherence levels. eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
         void updateCoherenceScore();  // function to update the coherence score of the session
         void updateAchievementScore(); // function to update the achievement score of the session
@@ -48,6 +51,7 @@ class Session: public QObject {
     public slots:
         void updateAll();
     private:
+        QDateTime startTime;
         double length;  // the length of the session
         QTimer* timer;
         double coherenceScore; // the coherence score of the session
@@ -61,8 +65,8 @@ class Session: public QObject {
         double mediumPercentage; // the percentage of medium coherence levels
         double highPercentage; // the percentage of high coherence levels
         QVector<QPointF>* hrvData; // the HRV data of the session
+        double lostTime; // hold the time gap to compensate between all rounds of input generation
 
         double generateRandomDouble(double min, double max); //generate random data
-        QVector<QPointF> *calPoints(QVector<double> **times);
 };
 #endif

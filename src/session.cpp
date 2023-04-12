@@ -1,8 +1,8 @@
 #include "session.h"
-#include <QDebug>
 
 // constructor to create a new session object
 Session::Session() {
+    this->startTime = QDateTime::currentDateTime();
     this->length = 0;
     this->timer = new QTimer();
     this->coherenceScore = 0;
@@ -17,6 +17,7 @@ Session::Session() {
     this->highPercentage = 0.0;
     // initialize the HRV graph with empty data
     this->hrvData = new QVector<QPointF>();
+    lostTime = 0.0;
 }
 
 // destructor to clean up memory used by the session object
@@ -24,6 +25,8 @@ Session::~Session() {
     delete hrvData;
     delete timer;
 }
+
+QDateTime Session::getStartTime() {return startTime;}
 
 // getter function to return the length of the session
 double Session::getLength() {return this->length;}
@@ -70,7 +73,6 @@ QVector<double>* Session::simulateHeartIntervals(double timeLimit) {
     double curTotal = 0;
     double randomNum = 0;
     while (curTotal < timeLimit) {
-
         if (curTotal < timeLimit/3) {
             randomNum = generateRandomDouble(0.6,1);
             heartIntervals->push_back(randomNum);
@@ -85,6 +87,8 @@ QVector<double>* Session::simulateHeartIntervals(double timeLimit) {
         }
         curTotal += randomNum;
     }
+    heartIntervals->pop_back();
+    lostTime = timeLimit - curTotal + randomNum;
     return heartIntervals;
 }
 
@@ -117,13 +121,18 @@ void Session::updateAchievementScore() {
 
 //function to update the coherence level of the session
 void Session::updateCoherenceLevel() {
+    int tempLevel;
     if (this->coherenceScore < 1) {
-        coherenceLevel = 0;
+        tempLevel = 0;
     } else if (this->coherenceScore >= 1 && this->coherenceScore < 2) {
-        coherenceLevel = 1;
+        tempLevel = 1;
     } else {
-        coherenceLevel = 2;
+        tempLevel = 2;
     }
+    if (tempLevel != coherenceLevel) {
+        beep();
+    }
+    coherenceLevel = tempLevel;
 }
 
 // function to update the HRV data of the session (append newData into hrvData)
@@ -138,7 +147,7 @@ void Session::updateAll() {
     updateAchievementScore();
     setLength(length+TIME_UPDATE);
     updateCoherenceLevel();
-    QVector<double>* newDoubles = simulateHeartIntervals(TIME_UPDATE);
+    QVector<double>* newDoubles = simulateHeartIntervals(TIME_UPDATE + lostTime);
     QVector<QPointF>* newPoints = calPoints(&newDoubles);
     updateHRVData(newPoints);
     delete newDoubles;
@@ -152,7 +161,7 @@ bool Session::isHRContactOn() {
 // function to emit a beep signal
 void Session::beep() {
     // implement the beep sound
-    qDebug() << "beep";
+    qInfo() << "***BEEP*** New coherence level is reached";
 }
 
 QVector<QPointF>* Session::calPoints(QVector<double>** times) {
