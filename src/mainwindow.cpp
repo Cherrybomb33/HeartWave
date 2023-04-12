@@ -99,18 +99,20 @@ void MainWindow::initializeMenu(Menu* menu) {
 
     //create submenu options of history
     historyList = database->getHistory();
+    //qDebug() << historyList;
     
     Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
-    Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
     Menu* historyMenu = new Menu("HISTORY", historyList, menu);
+    Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
 
     menu->addChildMenu(sessionMenu);
-    menu->addChildMenu(settingMenu);
     menu->addChildMenu(historyMenu);
+    menu->addChildMenu(settingMenu);
+
 
     Menu* resetMenu = new Menu("RESET", {"YES","NO"}, settingMenu);
     settingMenu->addChildMenu(resetMenu);
-    
+
     //create menus and submenus for each record in historyMenu
     for (const QString &str : historyList) {
         //set "yyyy-MM-dd hh:mm:ss" part as the menu name
@@ -129,7 +131,7 @@ void MainWindow::initializeHistory() {
     //create corresponding Record objects and add them to records
     for (const QString& str : allRecords) {
         //convert the datetime string to a QDateTime object
-        QDateTime datetime = QDateTime::fromString(str.left(19), "yyyy-MM-dd HH:mm:ss");
+        QDateTime datetime = QDateTime::fromString(str.mid(0,19), "yyyy-MM-dd HH:mm:ss");
 
         //create the Record object for the datetime and add it to the QVector
         Record* record = nullptr;
@@ -201,7 +203,7 @@ void MainWindow::endSession() {
     //currentDateTime to startDateTime
     database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                        currentSession->getAchievementScore()*5/currentSession->getLength(),
+                        (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
 
     delete currentSession;
@@ -241,13 +243,13 @@ void MainWindow::displayReview(Record* newRecord) {
     ui->date->setText((newRecord->getStartTime()).toString("yyyy-MM-dd hh:mm:ss"));
     ui->avgScore->setNum(newRecord->getAverageCoherence());
     ui->achScore->setNum(newRecord->getAchievementScore());
-    ui->lenScore->setNum(newRecord->getLength());
+    ui->lenScore->setText(QString::number(newRecord->getLength())+"s");
     ui->lowPercentage->setText(QString::number(newRecord->getLowPercentage())+"%");
     ui->mediumPercentage->setText(QString::number(newRecord->getMedPercentage())+"%");
     ui->highPercentage->setText(QString::number(newRecord->getHighPercentage())+"%");
     //how to show hrv graph?
     plotHistory(newRecord);
-
+    ui->stackedWidget->setVisible(true);
     ui->stackedWidget->setCurrentIndex(1);
 }
 
@@ -372,7 +374,7 @@ void MainWindow::navigateSubMenu() {
 
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "DELETE") {
         //currentMenu = currentMenu->get(index);
-        QString datatimeString = currentMenu->getParentMenu()->getName().left(19); //get datetime Qstring
+        QString datatimeString = currentMenu->getName().left(19); //get datetime Qstring
         QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
 
         for (int i = 0; i < records.size(); i++) {
@@ -389,8 +391,9 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
-        QString datatimeString = currentMenu->getParentMenu()->getName().left(19); //get datetime Qstring
-        QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+        //qDebug() << "Menu: " + datetimeString;
         currentMenu = currentMenu->get(index);
         updateMenu("Record", {});
 
