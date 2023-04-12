@@ -19,7 +19,6 @@ DBController::DBController() {
     if (!dbInit()) {
         throw "Error: Database failed to be initialized";
     }
-    qDebug()<<"Reach here";
 }
 
 //initialize heartwave database with two records

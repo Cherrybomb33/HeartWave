@@ -19,6 +19,10 @@ QString Menu::getName() {
     return name;
 }
 
+void Menu::setName(QString n){
+    name = n;
+}
+
 QStringList Menu::getMenuOptions() {
     return menuOptions;
 }
