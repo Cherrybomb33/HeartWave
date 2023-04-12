@@ -54,3 +54,22 @@ void Menu::addChildMenu(Menu* menu) {
         subMenu.push_back(menu);
     }
 }
+
+void Menu::deleteChildMenu(Menu* menu) {
+    //dind the index of the menu to be deleted
+    int index = menu->getPosition();
+
+    //remove the menu from the subMenu list
+    subMenu.removeAt(index);
+
+    //update the positions of the remaining sub-menus
+    for (int i = index; i < subMenu.size(); i++) {
+        subMenu[i]->position = i;
+    }
+
+    // Remove the menu's name from the menuOptions list
+    menuOptions.removeAt(index);
+
+    // Delete the menu
+    delete menu;
+}
