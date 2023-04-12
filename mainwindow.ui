@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>1</number>
+     <number>0</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -442,9 +442,9 @@ background-color:rgb(239, 41, 41);
      <widget class="QLabel" name="coherenceValue">
       <property name="geometry">
        <rect>
-        <x>100</x>
+        <x>130</x>
         <y>30</y>
-        <width>101</width>
+        <width>41</width>
         <height>16</height>
        </rect>
       </property>
@@ -460,15 +460,15 @@ background-color:rgb(239, 41, 41);
        <string notr="true"/>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;0.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
      <widget class="QLabel" name="lengthValue">
       <property name="geometry">
        <rect>
-        <x>270</x>
+        <x>275</x>
         <y>30</y>
-        <width>51</width>
+        <width>41</width>
         <height>16</height>
        </rect>
       </property>
@@ -487,9 +487,9 @@ background-color:rgb(239, 41, 41);
      <widget class="QLabel" name="achievementScore">
       <property name="geometry">
        <rect>
-        <x>420</x>
+        <x>430</x>
         <y>30</y>
-        <width>71</width>
+        <width>41</width>
         <height>16</height>
        </rect>
       </property>
@@ -502,7 +502,7 @@ background-color:rgb(239, 41, 41);
        </font>
       </property>
       <property name="text">
-       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;0.0&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+       <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p align=&quot;center&quot;&gt;0.00&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
       </property>
      </widget>
      <widget class="QProgressBar" name="bp">

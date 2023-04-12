@@ -30,9 +30,6 @@ public:
     explicit MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
-//    void plot(QVector<QPointF> **points); //Plot the HRV graph based on points parameter
-//    void addPlot(QVector<QPointF> **points);//Add more points to the HRV graph based on points parameter
-
 private:
     Menu* currentMenu;  //the current node of the menu tree that the user is on
     Menu* mainMenu;  //the original main menu node, need this in order to delete without memory leaks
@@ -93,7 +90,6 @@ private slots:
     void activateSensor(bool);   //Start/stop the session timer if they are on a measurement session
     void activateSensor(int);  //Start/stop the session from the admin panel
 
-//    void another5Sec(); //Generato another 5 seconds data and add it to the plot
     void sessionTimerSlot();
 };
 

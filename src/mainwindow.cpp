@@ -167,7 +167,7 @@ void MainWindow::startSession() {
 void MainWindow::sessionTimerSlot() {
     currentTimerCount++;
     // change length in sessionView and update breath pacer every 1 second
-    ui->lengthValue->setNum(currentTimerCount);
+    ui->lengthValue->setText(QString("%1:%2").arg(QString::number(currentTimerCount / 60),2,'0').arg(QString::number(currentTimerCount % 60),2,'0'));
     updateBP(setting->getBpInterval());
     // update session data every 5 seconds
     if (currentTimerCount % 5 == 0 && currentBattery > 0) {
@@ -192,11 +192,6 @@ void MainWindow::endSession() {
     currentSession->getTimer()->disconnect();
     currentSession->calCLPercentage();
 
-    currentTimerCount = -1;
-    sensorOn = false;
-    bpProgress = 0;
-    bpIsIncreasing = true;
-
     //to fill up enough data according to the actual running time
     if (currentTimerCount > currentSession->getLength()) {
         QVector<double>* newDoubles = currentSession->simulateHeartIntervals(currentTimerCount - currentSession->getLength());
@@ -216,6 +211,7 @@ void MainWindow::endSession() {
                         (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
     currentTimerCount = -1;
+    sensorOn = false;
     bpProgress = 0;
     bpIsIncreasing = true;
     ui->bp->setValue(0);
@@ -230,15 +226,15 @@ void MainWindow::endSession() {
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
-    ui->coherenceValue->setNum(0.0);
+    ui->coherenceValue->setText("0.00");
     ui->lengthValue->setText("00:00");
-    ui->achievementScore->setNum(0.0);
+    ui->achievementScore->setText("0.00");
     displayReview(newRecord);
 }
 
 void MainWindow::updateSessionView() {
-    ui->coherenceValue->setNum(currentSession->getCoherenceScore());
-    ui->achievementScore->setNum(currentSession->getAchievementScore());
+    ui->coherenceValue->setText(QString::number(currentSession->getCoherenceScore(),'f',2));
+    ui->achievementScore->setText(QString::number(currentSession->getAchievementScore(),'f',2));
     int coherenceLevel = currentSession->getCoherenceLevel();
     switch(coherenceLevel) {
         case 0 :
@@ -617,8 +613,8 @@ void MainWindow::plot() {
     }
     ui->sessionGraph->QCustomPlot::addGraph();
     ui->sessionGraph->graph(0)->setData(x, y);
-    ui->sessionGraph->xAxis->setLabel("Time");
-    ui->sessionGraph->yAxis->setLabel("HR");
+    ui->sessionGraph->xAxis->setLabel("Time (s)");
+    ui->sessionGraph->yAxis->setLabel("HR (bps)");
     ui->sessionGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->sessionGraph->yAxis->setRange(55, 105);
     ui->sessionGraph->replot();
@@ -639,50 +635,12 @@ void MainWindow::plotHistory(Record* record) {
 
     ui->historyGraph->QCustomPlot::addGraph();
     ui->historyGraph->graph(0)->setData(x, y);
-    ui->historyGraph->xAxis->setLabel("Time");
-    ui->historyGraph->yAxis->setLabel("HR");
+    ui->sessionGraph->xAxis->setLabel("Time (s)");
+    ui->sessionGraph->yAxis->setLabel("HR (bps)");
     ui->historyGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
     ui->historyGraph->yAxis->setRange(55, 105);
     ui->historyGraph->replot();
 }
-
-//void MainWindow::plot(QVector<QPointF>** points) {
-//    int size = (*points)->size();
-//    QVector<double> x(size), y(size);
-//    for (int i=0; i<size; i++) {
-//      x[i] = (*points)->at(i).x() + previousX;
-//      y[i] = (*points)->at(i).y();
-//      previousX = x[i];
-//      qInfo() << x[i] << "|" << y[i];
-//    }
-//    ui->hrvGraph->QCustomPlot::addGraph();
-//    ui->hrvGraph->graph(0)->setData(x, y);
-//    ui->hrvGraph->xAxis->setLabel("Time");
-//    ui->hrvGraph->yAxis->setLabel("HR");
-//    ui->hrvGraph->xAxis->setRange(0, 124);
-//    ui->hrvGraph->yAxis->setRange(55, 105);
-//    ui->hrvGraph->replot();
-//}
-
-//void MainWindow::addPlot(QVector<QPointF>** points) {
-//    int size = (*points)->size();
-//    QVector<double> x(size), y(size);
-//    for (int i=0; i<size; i++) {
-//      x[i] = (*points)->at(i).x() + previousX;
-//      y[i] = (*points)->at(i).y();
-//      previousX = x[i];
-//      qInfo()<< "????" << x[i] << "|" << y[i];
-//    }
-//    ui->hrvGraph->graph(0)->addData(x,y);
-//    ui->hrvGraph->replot();
-//}
-
-//void MainWindow::another5Sec()
-//{
-//    QVector<double>* points = currentSession->simulateHeartIntervals(5);
-//    QVector<QPointF>* tests = calPoints(&points);
-//    addPlot(&tests);
-//}
 
 void MainWindow::updateBP(int interval) {
     if (bpIsIncreasing) {
@@ -698,12 +656,3 @@ void MainWindow::updateBP(int interval) {
     }
     ui->bp->setValue(bpProgress);
 }
-
-//QVector<QPointF>* MainWindow::calPoints(QVector<double>** times) {
-//    QVector<QPointF>* points = new QVector<QPointF>();
-//    for (int i = 0;i < (*times)->size();i++) {
-//        QPointF newPoint((*times)->at(i),60/(*times)->at(i));
-//        points->push_back(newPoint);
-//    }
-//    return points;
-//}
