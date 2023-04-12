@@ -27,6 +27,10 @@ QStringList Menu::getMenuOptions() {
     return menuOptions;
 }
 
+void Menu::setMenuOptions(QStringList options){
+    menuOptions = options;
+}
+
 Menu* Menu::getParentMenu() {
     return parentMenu;
 }
