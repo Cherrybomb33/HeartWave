@@ -73,3 +73,14 @@ void Menu::deleteChildMenu(Menu* menu) {
     // Delete the menu
     delete menu;
 }
+
+void Menu::deleteAllSubMenus() {
+    //delete all submenus
+    for (Menu* sub : subMenu) {
+        delete sub;
+    }
+
+    // Clear the subMenu list and menuOptions list
+    subMenu.clear();
+    menuOptions.clear();
+}

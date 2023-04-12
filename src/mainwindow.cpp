@@ -384,8 +384,35 @@ void MainWindow::navigateSubMenu() {
 
             database->reset();
             setting->reset();
-   
             navigateBack();
+
+            //reset history menu
+            currentMenu->getParentMenu()->get(1)->deleteAllSubMenus();
+            //create submenu options of history
+            QStringList historyList = database->getHistory();
+            currentMenu->getParentMenu()->get(1)->setMenuOptions(historyList);
+
+            //create menus and submenus for each record in historyMenu
+            for (const QString &str : historyList) {
+                //set "yyyy-MM-dd hh:mm:ss" part as the menu name
+                Menu* record = new Menu(str.left(19), {"VIEW", "DELETE"}, currentMenu->getParentMenu()->get(1));
+                record->addChildMenu(new Menu("VIEW",{}, record));
+                record->addChildMenu(new Menu("DELETE", {}, record));
+                currentMenu->getParentMenu()->get(1)->addChildMenu(record);
+            }
+
+            initializeHistory();
+
+            //update bpsetting display
+            QStringList settingList;
+            settingList.append("RESET");
+            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+
+            ui->menuListWidget->clear();
+            ui->menuListWidget->addItems(settingList);
+            ui->menuListWidget->setCurrentRow(0);
+            currentMenu->setMenuOptions(settingList);
+
             return;
         }
         else {
