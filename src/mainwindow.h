@@ -17,7 +17,7 @@
 #include "setting.h"
 #include "record.h"
 
-#define MAX_SESSION_DURATION 30
+#define MAX_SESSION_DURATION 120
 
 namespace Ui {
 class MainWindow;
@@ -65,7 +65,6 @@ private:
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
     void consumeBattery(double consumption);  //Contains an equation of how much to drain the battery by then calling another function to change it
 
-//    QVector<QPointF>* calPoints(QVector<double>** times);
     void updateSession();
     void plot();
     void plotHistory(Record *Record);
