@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -708,7 +708,7 @@ background-color:rgb(239, 41, 41);
        <rect>
         <x>550</x>
         <y>80</y>
-        <width>41</width>
+        <width>51</width>
         <height>16</height>
        </rect>
       </property>
@@ -728,7 +728,7 @@ background-color:rgb(239, 41, 41);
        <rect>
         <x>470</x>
         <y>110</y>
-        <width>54</width>
+        <width>61</width>
         <height>17</height>
        </rect>
       </property>
@@ -748,7 +748,7 @@ background-color:rgb(239, 41, 41);
        <rect>
         <x>450</x>
         <y>160</y>
-        <width>54</width>
+        <width>71</width>
         <height>17</height>
        </rect>
       </property>
@@ -768,7 +768,7 @@ background-color:rgb(239, 41, 41);
        <rect>
         <x>480</x>
         <y>190</y>
-        <width>54</width>
+        <width>71</width>
         <height>17</height>
        </rect>
       </property>
@@ -788,7 +788,7 @@ background-color:rgb(239, 41, 41);
        <rect>
         <x>460</x>
         <y>220</y>
-        <width>54</width>
+        <width>91</width>
         <height>17</height>
        </rect>
       </property>
@@ -827,10 +827,10 @@ background-color:rgb(239, 41, 41);
      <widget class="QLabel" name="date">
       <property name="geometry">
        <rect>
-        <x>460</x>
+        <x>450</x>
         <y>20</y>
-        <width>121</width>
-        <height>16</height>
+        <width>151</width>
+        <height>20</height>
        </rect>
       </property>
       <property name="font">
@@ -841,7 +841,7 @@ background-color:rgb(239, 41, 41);
        </font>
       </property>
       <property name="text">
-       <string>2023-04-10 13:00</string>
+       <string>2023-04-10 13:00:00</string>
       </property>
      </widget>
      <widget class="QCustomPlot" name="historyGraph" native="true">

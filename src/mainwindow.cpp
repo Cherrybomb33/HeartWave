@@ -73,8 +73,8 @@ void MainWindow::setupConnections(){
     connect(ui->sensorButton, &QPushButton::clicked, [this]() {activateSensor(!sensorOn);});
 
     // prevent signals from being emitted(send signals only for BP interval setting interaction)
-    ui->leftButton->blockSignals(true);
-    ui->rightButton->blockSignals(true);
+    //ui->leftButton->blockSignals(true);
+    //ui->rightButton->blockSignals(true);
 
     //sensor QComboBox connections
     //connect(ui->sensorComboBox, QOverload<int>::of(&QComboBox::activated), this, QOverload<int>::of(&MainWindow::activateSensor));
@@ -84,6 +84,9 @@ void MainWindow::setupConnections(){
     
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
+    ui->lowLabel->setVisible(false);
+    ui->medLabel->setVisible(false);
+    ui->highLabel->setVisible(false);
     
     //Load records from the database
     initializeHistory();
@@ -95,7 +98,7 @@ void MainWindow::initializeMenu(Menu* menu) {
 
     //create submenu options of setting
     settingList.append("RESET");
-    settingList.append("BREATH PACER INTERVAL");
+    settingList.append("BREATH PACER INTERVAL:  10");
 
     //create submenu options of history
     historyList = database->getHistory();
@@ -189,6 +192,11 @@ void MainWindow::endSession() {
     currentSession->getTimer()->disconnect();
     currentSession->calCLPercentage();
 
+    currentTimerCount = -1;
+    sensorOn = false;
+    bpProgress = 0;
+    bpIsIncreasing = true;
+
     //to fill up enough data according to the actual running time
     if (currentTimerCount > currentSession->getLength()) {
         QVector<double>* newDoubles = currentSession->simulateHeartIntervals(currentTimerCount - currentSession->getLength());
@@ -218,6 +226,13 @@ void MainWindow::endSession() {
 
     delete currentSession;
     currentSession = nullptr;
+
+    ui->lowLabel->setVisible(false);
+    ui->medLabel->setVisible(false);
+    ui->highLabel->setVisible(false);
+    ui->coherenceValue->setNum(0.0);
+    ui->lengthValue->setText("00:00");
+    ui->achievementScore->setNum(0.0);
     displayReview(newRecord);
 }
 
@@ -251,12 +266,16 @@ void MainWindow::updateSessionView() {
 
 void MainWindow::displayReview(Record* newRecord) {
     ui->date->setText((newRecord->getStartTime()).toString("yyyy-MM-dd hh:mm:ss"));
-    ui->avgScore->setNum(newRecord->getAverageCoherence());
-    ui->achScore->setNum(newRecord->getAchievementScore());
+    ui->avgScore->setText(QString::number(newRecord->getAverageCoherence(),'f',2));
+    ui->achScore->setText(QString::number(newRecord->getAchievementScore(),'f',2));
     ui->lenScore->setText(QString::number(newRecord->getLength())+"s");
-    ui->lowPercentage->setText(QString::number(newRecord->getLowPercentage())+"%");
-    ui->mediumPercentage->setText(QString::number(newRecord->getMedPercentage())+"%");
-    ui->highPercentage->setText(QString::number(newRecord->getHighPercentage())+"%");
+    ui->lowPercentage->setText(QString::number(newRecord->getLowPercentage(),'f',2)+"%");
+    ui->lowPercentage->setStyleSheet("color: #a40000;");
+    ui->mediumPercentage->setText(QString::number(newRecord->getMedPercentage(),'f',2)+"%");
+    ui->mediumPercentage->setStyleSheet("color: #204a87;");
+    ui->highPercentage->setText(QString::number(newRecord->getHighPercentage(),'f',2)+"%");
+    ui->highPercentage->setStyleSheet("color: #4e9a06;");
+
     //how to show hrv graph?
     plotHistory(newRecord);
     ui->stackedWidget->setVisible(true);
@@ -342,13 +361,17 @@ void MainWindow::navigateDownMenu() {
 //press selectButton
 void MainWindow::navigateSubMenu() {
 
+    if (currentTimerCount != -1) {
+        //Save record and end session
+        if (currentMenu->getName() == "START NEW SESSION" && sensorOn==true) {
+            //ui->selectButton->blockSignals(true);
+            endSession();
+            return;
+        }
+    }
+
     int index = ui->menuListWidget->currentRow();
     if (index < 0) return;
-
-    // Prevent crash if ok button is selected in view
-    //if (currentMenu->getName() == "VIEW") {
-        //return;
-    //}
 
     //when the menu is the reset menu
     if (currentMenu->getName() == "RESET") {
@@ -432,10 +455,11 @@ void MainWindow::navigateToMainMenu() {
 
     //handle session interuption
     // ??cannot display review
-    if (currentTimerCount != 0) {
+    if (currentTimerCount != -1) {
         //Save record and end session
-        if (currentMenu->getName() == "START NEW SESSION") {
+        if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
             endSession();
+            return;
         }
     }
 
@@ -459,8 +483,9 @@ void MainWindow::navigateBack() {
     // ??cannot display review
     if (currentTimerCount != -1) {
         //Save record
-        if (currentMenu->getName() == "START NEW SESSION") {
+        if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
             endSession();
+            return;
         }
     }
 
@@ -485,7 +510,9 @@ void MainWindow::parameterPlus() {
     if (currentMenu->getName() == "SETTING"){
         if (index == 1 && currentBpInterval <=29){
             setting->setBpInterval(currentBpInterval+1);
-            ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
+            qDebug() << currentBpInterval;
+            currentMenu->get(index)->setName("BREATH PACER INTERVAL: " + (QString::number(currentBpInterval)));
+            //ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
         }
     }
 }
