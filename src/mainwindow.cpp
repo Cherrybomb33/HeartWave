@@ -145,7 +145,11 @@ void MainWindow::initializeHistory() {
 
 void MainWindow::startSession() {
     currentSession = new Session();
-    ui->contact->setVisible(true);
+    // set all coherence level light invisible????
+    ui->lowLabel->setVisible(false);
+    ui->medLabel->setVisible(false);
+    ui->highLabel->setVisible(false);
+    ui->contact->setVisible(sensorOn);
     //ui->sessionView->setVisible(true);
     ui->stackedWidget->setVisible(true);
     ui->stackedWidget->setCurrentIndex(0);   //session page
@@ -158,35 +162,28 @@ void MainWindow::startSession() {
     if (sensorOn == true) {
         sessionTimer->start(1000);
     }
-
-    //Left and right buttons are blocked
-    // enable buttons after ends!!!!!!!!!!!!
-    //ui->rightButton->blockSignals(true);
-    //ui->leftButton->blockSignals(true);
 }
 
 void MainWindow::sessionTimerSlot() {
-    QTime currentTime = QTime::currentTime();
+    currentTimerCount++;
     // change length in sessionView and update breath pacer every 1 second
-    if (currentTime.second() % 1 == 0) {
-        currentTimerCount++;
-        ui->lengthValue->setNum(currentTimerCount);
-        updateBP(setting->getBpInterval());
-    }
+    ui->lengthValue->setNum(currentTimerCount);
+    updateBP(setting->getBpInterval());
     // update session data every 5 seconds
-    if (currentTime.second() % 5 == 0) {
+    if (currentTimerCount % 5 == 0 && currentBattery > 0) {
         updateSession();
     }
 }
 
 void MainWindow::updateSession() {
-    consumeBattery(3.0);
-    currentSession->updateAll();
-    updateSessionView();
-    plot();
-
-    if (currentSession->getLength() >= MAX_SESSION_DURATION) {
-        endSession();
+    consumeBattery(0.5);
+    if (currentBattery > 0) {
+        currentSession->updateAll();
+        updateSessionView();
+        plot();
+        if (currentSession->getLength() >= MAX_SESSION_DURATION) {
+            endSession();
+        }
     }
 }
 
@@ -194,21 +191,38 @@ void MainWindow::endSession() {
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
     currentSession->calCLPercentage();
+
     currentTimerCount = -1;
     sensorOn = false;
     bpProgress = 0;
     bpIsIncreasing = true;
-    Record* newRecord = new Record(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+
+    //to fill up enough data according to the actual running time
+    if (currentTimerCount > currentSession->getLength()) {
+        QVector<double>* newDoubles = currentSession->simulateHeartIntervals(currentTimerCount - currentSession->getLength());
+        QVector<QPointF>* newPoints = currentSession->calPoints(&newDoubles);
+        currentSession->updateHRVData(newPoints);
+        delete newDoubles;
+    }
+
+    Record* newRecord = new Record(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
                                    currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                                    currentSession->getAchievementScore()*5/currentSession->getLength(),
                                    currentSession->getAchievementScore(), *(currentSession->getHRVData()));
     records.push_back(newRecord);
 
-    //currentDateTime to startDateTime
-    database->addRecord(QDateTime::currentDateTime(),currentSession->getLength(), currentSession->getLowPercentage(),
+    database->addRecord(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                         (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+    currentTimerCount = -1;
+    bpProgress = 0;
+    bpIsIncreasing = true;
+    ui->bp->setValue(0);
+    // set all coherence level light visible????
+    ui->lowLabel->setVisible(true);
+    ui->medLabel->setVisible(true);
+    ui->highLabel->setVisible(true);
 
     delete currentSession;
     currentSession = nullptr;
@@ -521,11 +535,14 @@ void MainWindow::parameterMinus() {
 //Slot to change the battery level from the control panel
 void MainWindow::changeBatteryCapacity(double capacity) {
 
-    if (capacity >= 0 && capacity <= 100) {
+    if (capacity > 0 && capacity <= 100) {
         currentBattery = capacity;
         ui->battery->setValue(currentBattery);
         ui->batterySpinBox->setValue(currentBattery);
     }else {
+        if (currentTimerCount != -1) {
+            navigateBack();
+        }
         powerSwitch();
         currentBattery = 0;
     }
@@ -540,11 +557,13 @@ void MainWindow::activateSensor(bool checked) {
 
     if (currentTimerCount != -1) {
         if (!sensorOn) {
-            endSession();
+            currentSession->getTimer()->stop();
+            //endSession();
         }
         else {
             currentSession->getTimer()->start(1000);
         }
+        ui->contact->setVisible(sensorOn);
     }
 }
 
