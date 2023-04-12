@@ -389,13 +389,15 @@ void MainWindow::navigateSubMenu() {
 
             database->reset();
             setting->reset();
+
             // delete original main menu object and regenerate a new menu object for resetting, then navigate to main menu
-            delete mainMenu;
+            mainMenu->deleteAllSubMenus();
             initializeHistory();
             currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
             mainMenu = currentMenu;
             initializeMenu(currentMenu);
             navigateToMainMenu();
+
             return;
         }
         else {
@@ -461,8 +463,12 @@ void MainWindow::navigateSubMenu() {
             }
         }
 
-        qDebug() << "No matching record found.";
+        qDebug() << "No matching record found";
+
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "HISTORY") {
+        qDebug() << "No history records available";
     }
+
 }
 
 void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {

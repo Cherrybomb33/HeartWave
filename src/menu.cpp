@@ -56,7 +56,7 @@ void Menu::addChildMenu(Menu* menu) {
 }
 
 void Menu::deleteChildMenu(Menu* menu) {
-    //dind the index of the menu to be deleted
+    //find the index of the menu to be deleted
     int index = menu->getPosition();
 
     //remove the menu from the subMenu list
@@ -67,9 +67,21 @@ void Menu::deleteChildMenu(Menu* menu) {
         subMenu[i]->position = i;
     }
 
-    // Remove the menu's name from the menuOptions list
+    //remove the menu's name from the menuOptions list
     menuOptions.removeAt(index);
 
-    // Delete the menu
+    //delete the menu
     delete menu;
+}
+
+void Menu::deleteAllSubMenus() {
+    //delete all submenus
+    for (Menu* sub : subMenu) {
+        sub->deleteAllSubMenus();
+        delete sub;
+    }
+
+    // Clear the subMenu list and menuOptions list
+    subMenu.clear();
+    menuOptions.clear();
 }
