@@ -40,6 +40,9 @@ void MainWindow::setupConnections(){
     //create database connection
     database = new DBController();
 
+    //Load records from the database
+    initializeHistory();
+
     //create menu tree
     currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
     mainMenu = currentMenu;
@@ -87,25 +90,18 @@ void MainWindow::setupConnections(){
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
-    
-    //Load records from the database
-    initializeHistory();
 }
 
 void MainWindow::initializeMenu(Menu* menu) {
     QStringList settingList;
-    QStringList historyList;
 
     //create submenu options of setting
     settingList.append("RESET");
     settingList.append("BREATH PACER INTERVAL:  10");
 
     //create submenu options of history
-    historyList = database->getHistory();
-    //qDebug() << historyList;
-    
     Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
-    Menu* historyMenu = new Menu("HISTORY", historyList, menu);
+    Menu* historyMenu = new Menu("HISTORY", allRecords, menu);
     Menu* settingMenu = new Menu("SETTINGS", settingList, menu);
 
     menu->addChildMenu(sessionMenu);
@@ -117,7 +113,7 @@ void MainWindow::initializeMenu(Menu* menu) {
     settingMenu->addChildMenu(resetMenu);
 
     //create menus and submenus for each record in historyMenu
-    for (const QString &str : historyList) {
+    for (const QString &str : allRecords) {
         //set "yyyy-MM-dd hh:mm:ss" part as the menu name
         Menu* record = new Menu(str.left(19), {"VIEW", "DELETE"}, historyMenu);
         record->addChildMenu(new Menu("VIEW",{}, record));
@@ -210,6 +206,19 @@ void MainWindow::endSession() {
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                         (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+
+    // add new menu option to the history tab after a session ends
+    Menu* historyMenu = mainMenu->get(1);
+    Menu* newHistoryRecord = new Menu(currentSession->getStartTime().toString("yyyy-MM-dd HH:mm:ss"), {"VIEW", "DELETE"}, historyMenu);
+    newHistoryRecord->addChildMenu(new Menu("VIEW",{}, newHistoryRecord));
+    newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
+    historyMenu->addChildMenu(newHistoryRecord);
+    QString newRecordString = newHistoryRecord->getName() + "\n"
+        + "   Length: " + QString::number(currentTimerCount / 60)
+        + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
+    allRecords.push_back(newRecordString);
+    historyMenu->setMenuOptions(allRecords);
+
     currentTimerCount = -1;
     sensorOn = false;
     bpProgress = 0;
@@ -380,8 +389,13 @@ void MainWindow::navigateSubMenu() {
 
             database->reset();
             setting->reset();
-   
-            navigateBack();
+            // delete original main menu object and regenerate a new menu object for resetting, then navigate to main menu
+            delete mainMenu;
+            initializeHistory();
+            currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
+            mainMenu = currentMenu;
+            initializeMenu(currentMenu);
+            navigateToMainMenu();
             return;
         }
         else {
@@ -426,14 +440,22 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
+//        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+//        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+//        //qDebug() << "Menu: " + datetimeString;
+//        currentMenu = currentMenu->get(index);
+//        updateMenu("Record", {});
+//        for (Record* record : records) {
+//            if (record->getStartTime() == datetime) {
+//                displayReview(record);
+//                return;
+//            }
+//        }
         QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
-        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
-        //qDebug() << "Menu: " + datetimeString;
         currentMenu = currentMenu->get(index);
         updateMenu("Record", {});
-
         for (Record* record : records) {
-            if (record->getStartTime() == datetime) {
+            if (record->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) { // compare menu string to every record's QDateTime string
                 displayReview(record);
                 return;
             }
@@ -467,9 +489,10 @@ void MainWindow::navigateToMainMenu() {
     }
 
     //loop until return the main menu
-    while (currentMenu->getName() != "MAIN MENU") {
-        currentMenu = currentMenu->getParentMenu();
-    }
+//    while (currentMenu->getName() != "MAIN MENU") {
+//        currentMenu = currentMenu->getParentMenu();
+//    }
+    currentMenu = mainMenu;
 
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     ui->stackedWidget->setVisible(false);
