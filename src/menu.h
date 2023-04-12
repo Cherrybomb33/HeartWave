@@ -22,6 +22,7 @@ public:
     void setMenuOptions(QStringList options);
     Menu* get(int);  //return a pointer to a submenu object at a given index in the list of submenus
     void addChildMenu(Menu*);  //add a new sub-menu object to the list of sub-menus contained within this menu object
+    void deleteChildMenu(Menu* menu);
 
 private:
 	QString name;   //menu title

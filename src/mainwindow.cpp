@@ -413,11 +413,16 @@ void MainWindow::navigateSubMenu() {
                 delete records[i];
                 records.remove(i);
                 qDebug() << "Record deleted successfully!";
-                return;
+                //return;
+                break;
             }
         }
 
-        qDebug() << "No matching record found.";
+        Menu* tempMenu = currentMenu;
+        navigateBack(); // Navigate back to the parent menu
+
+        currentMenu->deleteChildMenu(tempMenu);
+        updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
