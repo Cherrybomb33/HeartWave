@@ -360,7 +360,7 @@ void MainWindow::selectAction() {
     //when user presses the button during the measurement session
     if (currentTimerCount != -1) {
         //Save record and end session
-        if (currentMenu->getName() == "START NEW SESSION" && sensorOn==true) {
+        if (currentMenu->getName() == "START NEW SESSION" && currentTimerCount!=0) {
             endSession();
             return;
         }
