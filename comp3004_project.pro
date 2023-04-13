@@ -16,25 +16,23 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 source_dir = src
-res_dir = res
+lib_dir = res/lib/
 
 SOURCES += \
-    $${source_dir}/breath_pacer.cpp \
     $${source_dir}/dbController.cpp \
     $${source_dir}/main.cpp \
     $${source_dir}/mainwindow.cpp \
     $${source_dir}/menu.cpp \
-    $${source_dir}/qcustomplot.cpp \
+    $${lib_dir}/qcustomplot.cpp \
     $${source_dir}/record.cpp \
     $${source_dir}/session.cpp \
     $${source_dir}/setting.cpp
 
 HEADERS += \
-    $${source_dir}/breath_pacer.h \
     $${source_dir}/dbController.h \
     $${source_dir}/mainwindow.h \
     $${source_dir}/menu.h \
-    $${source_dir}/qcustomplot.h \
+    $${lib_dir}/qcustomplot.h \
     $${source_dir}/record.h \
     $${source_dir}/session.h \
     $${source_dir}/setting.h
@@ -51,6 +49,9 @@ DISTFILES +=
 
 RESOURCES += \
     res/res.qrc
+
+INCLUDEPATH += \
+    $${lib_dir}
 
 QT += sql
 
