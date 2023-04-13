@@ -125,14 +125,14 @@ void MainWindow::initializeHistory() {
 }
 
 void MainWindow::startSession() {
+    //display the session view
     currentSession = new Session();
-    // set all coherence level light invisible????
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
     ui->contact->setVisible(sensorOn);
     ui->stackedWidget->setVisible(true);
-    ui->stackedWidget->setCurrentIndex(0);   //session page
+    ui->stackedWidget->setCurrentIndex(0);
     plot(); //generate initial empty plot
 
     //Connect timer to update all session data
@@ -157,13 +157,17 @@ void MainWindow::sessionTimerSlot() {
 
 void MainWindow::updateSession() {
     consumeBattery(0.5);
-    if (currentBattery > 0) {
+    //session can only update when battery is 10% above
+    if (currentBattery > 10.0) {
         currentSession->updateAll();
         updateSessionView();
         plot();
-        if (currentSession->getLength() >= MAX_SESSION_DURATION) {
+        if (currentTimerCount >= MAX_SESSION_DURATION) {
             endSession();
         }
+    }else {
+        qDebug() << "Battery is under 10%, this session cannot continue, please charge";
+        endSession();
     }
 }
 
@@ -180,50 +184,53 @@ void MainWindow::endSession() {
         delete newDoubles;
     }
 
+    //save new record to database and check its validity
+    bool flag = database->addRecord(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
+                        currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
+                        (currentSession->getAchievementScore()*5)/currentSession->getLength(),
+                        currentSession->getAchievementScore(), *(currentSession->getHRVData()));
     Record* newRecord = new Record(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
                                    currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                                    currentSession->getAchievementScore()*5/currentSession->getLength(),
                                    currentSession->getAchievementScore(), *(currentSession->getHRVData()));
-    records.push_back(newRecord);
 
-    database->addRecord(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
-                        currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
-                        (currentSession->getAchievementScore()*5)/currentSession->getLength(),
-                        currentSession->getAchievementScore(), *(currentSession->getHRVData()));
+    //only add it in memory and create history option for it if it is valid
+    if (flag) {
+        records.push_back(newRecord);
 
-    // add new menu option to the history tab after a session ends
-    Menu* historyMenu = mainMenu->get(1);
-    Menu* newHistoryRecord = new Menu(currentSession->getStartTime().toString("yyyy-MM-dd HH:mm:ss"), {"VIEW", "DELETE"}, historyMenu);
-    newHistoryRecord->addChildMenu(new Menu("VIEW",{}, newHistoryRecord));
-    newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
-    historyMenu->addChildMenu(newHistoryRecord);
-    QString newRecordString = newHistoryRecord->getName() + "\n"
-        + "   Length: " + QString::number(currentTimerCount / 60)
-        + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
-    QStringList tempMenuOptions = historyMenu->getMenuOptions();
-    tempMenuOptions.push_back(newRecordString);
-    historyMenu->setMenuOptions(tempMenuOptions);
+        // add new menu option to the history tab after a session ends
+        Menu* historyMenu = mainMenu->get(1);
+        Menu* newHistoryRecord = new Menu(currentSession->getStartTime().toString("yyyy-MM-dd HH:mm:ss"), {"VIEW", "DELETE"}, historyMenu);
+        newHistoryRecord->addChildMenu(new Menu("VIEW",{}, newHistoryRecord));
+        newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
+        historyMenu->addChildMenu(newHistoryRecord);
+        QString newRecordString = newHistoryRecord->getName() + "\n"
+            + "   Length: " + QString::number(currentTimerCount / 60)
+            + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
+        QStringList temp = historyMenu->getMenuOptions();
+        temp.push_back(newRecordString);
+        historyMenu->setMenuOptions(temp);
+    }else {delete newRecord;}
 
     currentTimerCount = -1;
     sensorOn = false;
     bpProgress = 0;
     bpIsIncreasing = true;
-    ui->bp->setValue(0);
-    // set all coherence level light visible????
-    ui->lowLabel->setVisible(true);
-    ui->medLabel->setVisible(true);
-    ui->highLabel->setVisible(true);
 
     delete currentSession;
     currentSession = nullptr;
 
+    ui->bp->setValue(0);
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
     ui->coherenceValue->setText("0.00");
     ui->lengthValue->setText("00:00");
     ui->achievementScore->setText("0.00");
-    displayReview(newRecord);
+
+    //display review right after session ends if this record is valid
+    if (flag) {displayReview(newRecord);}
+    else {backToPrevious();}
 }
 
 void MainWindow::updateSessionView() {
@@ -393,10 +400,13 @@ void MainWindow::selectAction() {
     if (currentMenu->get(index)->getMenuOptions().length() > 0) {
         currentMenu = currentMenu->get(index);
         updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
-    }
+     //If the menu is not a parent and clicking on it starts a session
+    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
+        if (currentBattery <= 10.0) {
+            qDebug()<<"Battery is under 10%, cannot start a new session, please charge";
+            return;
+        }
 
-    //starts a session
-    else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
         //Update new menu info
         currentMenu = currentMenu->get(index);
         updateMenu("Measuring", {});
@@ -467,7 +477,7 @@ void MainWindow::backToMainMenu() {
     //handle session interuption
     if (currentTimerCount != -1) {
         //Save record and end session
-        if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
+        if (currentMenu->getName() == "START NEW SESSION") {
             endSession();
             return;
         }
@@ -485,7 +495,7 @@ void MainWindow::backToPrevious() {
     //handle session interuption
     if (currentTimerCount != -1) {
         //Save record
-        if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
+        if (currentMenu->getName() == "START NEW SESSION") {
             endSession();
             return;
         }
@@ -574,7 +584,6 @@ void MainWindow::activateSensor(bool checked) {
     if (currentTimerCount != -1) {
         if (!sensorOn) {
             currentSession->getTimer()->stop();
-            //endSession();
         }
         else {
             currentSession->getTimer()->start(1000);
@@ -619,7 +628,7 @@ void MainWindow::plot() {
     ui->sessionGraph->replot();
 }
 
-//
+
 void MainWindow::plotHistory(Record* record) {
     QVector<QPointF> points = record->getHrvGraph();
 
