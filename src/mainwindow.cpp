@@ -1,19 +1,15 @@
 #include "mainwindow.h"
-
-#include "mainwindow.h"
 #include "ui_mainwindow.h"
-#include <QDebug>
-
 
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
     ui->setupUi(this);
-
     setupConnections();
 }
 
 //destructor
 MainWindow::~MainWindow() {
+    //mainMenu->deleteAllSubMenus();
     delete mainMenu;
     delete ui;
 
@@ -26,7 +22,6 @@ MainWindow::~MainWindow() {
 
 void MainWindow::setupConnections(){
     // Initialize timer counter
-
     currentTimerCount = -1;
     bpProgress = 0;
     bpIsIncreasing = true;
@@ -49,7 +44,6 @@ void MainWindow::setupConnections(){
     initializeMenu(currentMenu);
 
     // Initialize the main menu view
-    //activeQListWidget = ui->menuListWidget;
     ui->menuListWidget->addItems(currentMenu->getMenuOptions());
     ui->menuListWidget->setCurrentRow(0);
     ui->menuLabel->setText(currentMenu->getName());
@@ -65,22 +59,14 @@ void MainWindow::setupConnections(){
     connect(ui->batterySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
 
     //interface buttons connections
-    connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::navigateUpMenu);
-    connect(ui->downButton, &QPushButton::pressed, this, &MainWindow::navigateDownMenu);
-    connect(ui->selectButton, &QPushButton::pressed, this, &MainWindow::navigateSubMenu);
-    connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::navigateToMainMenu);
-    connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::navigateBack);
+    connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::scrollUp);
+    connect(ui->downButton, &QPushButton::pressed, this, &MainWindow::scrollDown);
+    connect(ui->selectButton, &QPushButton::pressed, this, &MainWindow::selectAction);
+    connect(ui->menuButton, &QPushButton::pressed, this, &MainWindow::backToMainMenu);
+    connect(ui->backButton, &QPushButton::pressed, this, &MainWindow::backToPrevious);
     connect(ui->rightButton, &QPushButton::pressed, this, &MainWindow::parameterPlus);
     connect(ui->leftButton, &QPushButton::pressed, this, &MainWindow::parameterMinus);
-//    connect(ui->sensorButton, &QPushButton::clicked, this, QOverload<bool>::of(&MainWindow::activateSensor));  //this one is replaced by the next line
     connect(ui->sensorButton, &QPushButton::clicked, [this]() {activateSensor(!sensorOn);});
-
-    // prevent signals from being emitted(send signals only for BP interval setting interaction)
-    //ui->leftButton->blockSignals(true);
-    //ui->rightButton->blockSignals(true);
-
-    //sensor QComboBox connections
-    //connect(ui->sensorComboBox, QOverload<int>::of(&QComboBox::activated), this, QOverload<int>::of(&MainWindow::activateSensor));
 
     // Initialize battery levels
     ui->batterySpinBox->setValue(currentBattery);
@@ -107,7 +93,6 @@ void MainWindow::initializeMenu(Menu* menu) {
     menu->addChildMenu(sessionMenu);
     menu->addChildMenu(historyMenu);
     menu->addChildMenu(settingMenu);
-
 
     Menu* resetMenu = new Menu("RESET", {"YES","NO"}, settingMenu);
     settingMenu->addChildMenu(resetMenu);
@@ -181,7 +166,7 @@ void MainWindow::updateSession() {
             endSession();
         }
     }else {
-        qDebug("Battery is under 10%, this session cannot continue, please charge");
+        qDebug() << "Battery is under 10%, this session cannot continue, please charge";
         endSession();
     }
 }
@@ -245,7 +230,7 @@ void MainWindow::endSession() {
 
     //display review right after session ends if this record is valid
     if (flag) {displayReview(newRecord);}
-    else {navigateBack();}
+    else {backToPrevious();}
 }
 
 void MainWindow::updateSessionView() {
@@ -277,6 +262,7 @@ void MainWindow::updateSessionView() {
 }
 
 void MainWindow::displayReview(Record* newRecord) {
+    //display indicators' values
     ui->date->setText((newRecord->getStartTime()).toString("yyyy-MM-dd hh:mm:ss"));
     ui->avgScore->setText(QString::number(newRecord->getAverageCoherence(),'f',2));
     ui->achScore->setText(QString::number(newRecord->getAchievementScore(),'f',2));
@@ -288,24 +274,23 @@ void MainWindow::displayReview(Record* newRecord) {
     ui->highPercentage->setText(QString::number(newRecord->getHighPercentage(),'f',2)+"%");
     ui->highPercentage->setStyleSheet("color: #4e9a06;");
 
-    //how to show hrv graph?
+    //show hrv graph
     plotHistory(newRecord);
     ui->stackedWidget->setVisible(true);
     ui->stackedWidget->setCurrentIndex(1);
 }
 
-//Disable UI for power-off, and enable the UI for power-on
+//Disable user UI for power-off, and enable user UI for power-on
 void MainWindow::changePowerStatus() {
 
     ui->menuListWidget->setVisible(powerOn);
     ui->menuLabel->setVisible(powerOn);
     ui->status->setVisible(powerOn);   //display battery level and sensor detector
     ui->stackedWidget->setVisible(powerOn);
-    //ui->sessionViewWidget->setVisible(powerOn);
 
     //Remove this if we want the menu to stay in the same position when the power is off
     if (powerOn) {
-        MainWindow::navigateToMainMenu();
+        MainWindow::backToMainMenu();
         ui->sensorButton->setChecked(false);
         activateSensor(false);
     }
@@ -318,7 +303,6 @@ void MainWindow::changePowerStatus() {
     ui->selectButton->setEnabled(powerOn);
     ui->backButton->setEnabled(powerOn);
     ui->sensorButton->setEnabled(powerOn);
-    //ui->sensorComboBox->setEnabled(powerOn);  //control panel
 }
 
 //set power on/off state
@@ -346,8 +330,8 @@ void MainWindow::chargeBattery() {
     changeBatteryCapacity(fullyCharged);
 }
 
-
-void MainWindow::navigateUpMenu() {
+//press up button
+void MainWindow::scrollUp() {
 
     int nextIndex = ui->menuListWidget->currentRow() - 1;
 
@@ -358,8 +342,8 @@ void MainWindow::navigateUpMenu() {
     ui->menuListWidget->setCurrentRow(nextIndex);
 }
 
-
-void MainWindow::navigateDownMenu() {
+//press down button
+void MainWindow::scrollDown() {
 
     int nextIndex = ui->menuListWidget->currentRow() + 1;
 
@@ -371,11 +355,11 @@ void MainWindow::navigateDownMenu() {
 }
 
 //press selectButton
-void MainWindow::navigateSubMenu() {
+void MainWindow::selectAction() {
+    //when user presses the button during the measurement session
     if (currentTimerCount != -1) {
         //Save record and end session
-        if (currentMenu->getName() == "START NEW SESSION") {
-            //ui->selectButton->blockSignals(true);
+        if (currentMenu->getName() == "START NEW SESSION" && sensorOn==true) {
             endSession();
             return;
         }
@@ -385,9 +369,10 @@ void MainWindow::navigateSubMenu() {
     if (index < 0) return;
     if (currentMenu->getName() == "SETTINGS" && index==1){return;} //handle when user presses select button during BPInterval setting scenario
 
-    //when the menu is the reset menu
+    //reset to initial state
     if (currentMenu->getName() == "RESET") {
         if (currentMenu->getMenuOptions()[index] == "YES") {
+            //resetAction();
             for (int i = 0; i < records.size(); i++) {
                 delete records[i];
             }
@@ -402,85 +387,92 @@ void MainWindow::navigateSubMenu() {
             currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
             mainMenu = currentMenu;
             initializeMenu(currentMenu);
-            navigateToMainMenu();
+            backToMainMenu();
 
             return;
-        }
-        else {
-            navigateBack();
+        }else {
+            backToPrevious();
             return;
         }
     }
 
-    //If the menu is a parent and clicking on it will display sub menus.
+    //display child items
     if (currentMenu->get(index)->getMenuOptions().length() > 0) {
         currentMenu = currentMenu->get(index);
-        MainWindow::updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
-
+        updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
      //If the menu is not a parent and clicking on it starts a session
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
         if (currentBattery <= 10.0) {
-            qDebug("Battery is under 10%, cannot start a new session, please charge");
+            qDebug()<<"Battery is under 10%, cannot start a new session, please charge";
             return;
         }
+
         //Update new menu info
         currentMenu = currentMenu->get(index);
-        MainWindow::updateMenu("Measuring", {});
-        MainWindow::startSession();
-
-    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "DELETE") {
-        //currentMenu = currentMenu->get(index);
-        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
-        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
-
-        for (int i = 0; i < records.size(); i++) {
-            if (records[i]->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) {
-                database->deleteRecord(datetime);
-                delete records[i];
-                records.remove(i);
-                qDebug() << "Record deleted successfully!";
-                break;
-            }
-        }
-
-        Menu* tempMenu = currentMenu;
-        navigateBack(); // Navigate back to the parent menu
-
-        currentMenu->deleteChildMenu(tempMenu);
-        updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
-
-    //If the button pressed should display the records.
-    }else if (currentMenu->get(index)->getName() == "VIEW") {
-        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
-        currentMenu = currentMenu->get(index);
-        updateMenu("Record", {});
-        for (Record* record : records) {
-            if (record->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) { // compare menu string to every record's QDateTime string
-                displayReview(record);
-                return;
-            }
-        }
-
-        qDebug() << "No matching record found";
-
-    }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "HISTORY") {
+        updateMenu("Measuring", {});
+        startSession();
+    }
+    //delete a record
+    else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "DELETE") {
+        deleteAction();
+    }
+    //display record summary
+    else if (currentMenu->get(index)->getName() == "VIEW") {
+        viewAction(index);
+    }
+    //remind user if there is no available history record
+    else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "HISTORY") {
         qDebug() << "No history records available";
     }
-
 }
 
-void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList menuItems) {
+
+void MainWindow::viewAction(int index){
+    QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+    currentMenu = currentMenu->get(index);
+    updateMenu("Record", {});
+    for (Record* record : records) {
+        if (record->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) { // compare menu string to every record's QDateTime string
+            displayReview(record);
+            return;
+        }
+    }
+    qDebug() << "No matching record found";
+}
+
+void MainWindow::deleteAction(){
+    QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+    QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+
+    for (int i = 0; i < records.size(); i++) {
+        if (records[i]->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) {
+            database->deleteRecord(datetime);
+            delete records[i];
+            records.remove(i);
+            //qDebug() << "Record deleted successfully!";
+            break;
+        }
+    }
+
+    Menu* tempMenu = currentMenu;
+    backToPrevious(); // Navigate back to the parent menu
+
+    currentMenu->deleteChildMenu(tempMenu);
+    updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+}
+
+void MainWindow::updateMenu(const QString menuName, const QStringList menuOptions) {
 
     ui->menuListWidget->clear();
-    ui->menuListWidget->addItems(menuItems);
+    ui->menuListWidget->addItems(menuOptions);
     ui->menuListWidget->setCurrentRow(0);
 
-    ui->menuLabel->setText(selectedMenuItem);
+    ui->menuLabel->setText(menuName);
     ui->menuLabel->setStyleSheet("QLabel { font-weight: 600; color: #e9b96e; qproperty-alignment: 'AlignHCenter | AlignVCenter'; background-color: white;}");
 }
 
 //mainMenu button slot
-void MainWindow::navigateToMainMenu() {
+void MainWindow::backToMainMenu() {
 
     //handle session interuption
     if (currentTimerCount != -1) {
@@ -491,19 +483,14 @@ void MainWindow::navigateToMainMenu() {
         }
     }
 
-    //loop until return the main menu
-//    while (currentMenu->getName() != "MAIN MENU") {
-//        currentMenu = currentMenu->getParentMenu();
-//    }
     currentMenu = mainMenu;
-
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
 }
 
 
-void MainWindow::navigateBack() {
+void MainWindow::backToPrevious() {
 
     //handle session interuption
     if (currentTimerCount != -1) {
@@ -535,8 +522,6 @@ void MainWindow::parameterPlus() {
     if (currentMenu->getName() == "SETTINGS"){
         if (index == 1 && currentBpInterval <=29){
             setting->setBpInterval(currentBpInterval+1);
-            //currentMenu->get(index)->setName("BREATH PACER INTERVAL: " + (QString::number(currentBpInterval)));
-            //ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
 
             QStringList settingList;
             settingList.append("RESET");
@@ -561,7 +546,6 @@ void MainWindow::parameterMinus() {
     if (currentMenu->getName() == "SETTINGS"){
         if (index == 1 && currentBpInterval >1){
             setting->setBpInterval(currentBpInterval-1);
-            //ui->menuListWidget->item(index)->setText("BREATH PACER INTERVAL: " + QString::number(currentBpInterval));
 
             QStringList settingList;
             settingList.append("RESET");
@@ -585,7 +569,7 @@ void MainWindow::changeBatteryCapacity(double capacity) {
         ui->batterySpinBox->setValue(currentBattery);
     }else {
         if (currentTimerCount != -1) {
-            navigateBack();
+            backToPrevious();
         }
         powerSwitch();
         currentBattery = 0;
@@ -644,6 +628,7 @@ void MainWindow::plot() {
     ui->sessionGraph->replot();
 }
 
+
 void MainWindow::plotHistory(Record* record) {
     QVector<QPointF> points = record->getHrvGraph();
 
@@ -660,7 +645,7 @@ void MainWindow::plotHistory(Record* record) {
     ui->historyGraph->graph(0)->setData(x, y);
     ui->sessionGraph->xAxis->setLabel("Time (s)");
     ui->sessionGraph->yAxis->setLabel("HR (bps)");
-    ui->historyGraph->xAxis->setRange(0, MAX_SESSION_DURATION);
+    ui->historyGraph->xAxis->setRange(0, record->getLength());
     ui->historyGraph->yAxis->setRange(55, 105);
     ui->historyGraph->replot();
 }
