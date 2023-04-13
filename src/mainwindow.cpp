@@ -313,10 +313,11 @@ void MainWindow::powerSwitch() {
     }
 
     //handle poweroff event during session measurement  ??
-    if (currentTimerCount != 0) {
+    if (currentTimerCount != -1) {
         //Save Record and end session
-        if (currentMenu->getName() == "Session") {
+        if (currentMenu->getName() == "START NEW SESSION") {
             endSession();
+            backToMainMenu();
         }
 
         activateSensor(false);
@@ -578,7 +579,6 @@ void MainWindow::changeBatteryCapacity(double capacity) {
 
 //Starts/stops the session timer if they are on a session
 void MainWindow::activateSensor(bool checked) {
-
     sensorOn = checked;
 
     if (currentTimerCount != -1) {
@@ -590,16 +590,6 @@ void MainWindow::activateSensor(bool checked) {
         }
         ui->contact->setVisible(sensorOn);
     }
-}
-
-void MainWindow::activateSensor(int value) {
-
-    ui->sensorButton->setChecked(value == 1);
-    activateSensor(value == 1);
-}
-
-void MainWindow::consumeBattery(double consumption) {
-    changeBatteryCapacity(currentBattery - consumption);
 }
 
 //void MainWindow::changeChallengeLevel(int level) {

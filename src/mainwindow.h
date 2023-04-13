@@ -49,8 +49,6 @@ private:
     int currentTimerCount;
     int bpProgress;
     bool bpIsIncreasing;
-
-    QString timeString; //a string representation of how long the session runs
     
     void setupConnections();
     void updateMenu(const QString menuName, const QStringList menuOptions);
@@ -84,7 +82,6 @@ private slots:
     void parameterMinus();
     
     void activateSensor(bool isOn);   //Start/stop the session timer if they are on a measurement session
-    void activateSensor(int value);  //Start/stop the session from the admin panel
 
     void sessionTimerSlot();
 };
