@@ -216,8 +216,9 @@ void MainWindow::endSession() {
     QString newRecordString = newHistoryRecord->getName() + "\n"
         + "   Length: " + QString::number(currentTimerCount / 60)
         + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
-    allRecords.push_back(newRecordString);
-    historyMenu->setMenuOptions(allRecords);
+    QStringList temp = historyMenu->getMenuOptions();
+    temp.push_back(newRecordString);
+    historyMenu->setMenuOptions(temp);
 
     currentTimerCount = -1;
     sensorOn = false;
@@ -429,7 +430,6 @@ void MainWindow::navigateSubMenu() {
                 delete records[i];
                 records.remove(i);
                 qDebug() << "Record deleted successfully!";
-                //return;
                 break;
             }
         }
@@ -442,17 +442,6 @@ void MainWindow::navigateSubMenu() {
 
     //If the button pressed should display the records.
     }else if (currentMenu->get(index)->getName() == "VIEW") {
-//        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
-//        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
-//        //qDebug() << "Menu: " + datetimeString;
-//        currentMenu = currentMenu->get(index);
-//        updateMenu("Record", {});
-//        for (Record* record : records) {
-//            if (record->getStartTime() == datetime) {
-//                displayReview(record);
-//                return;
-//            }
-//        }
         QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
         currentMenu = currentMenu->get(index);
         updateMenu("Record", {});
@@ -485,7 +474,6 @@ void MainWindow::updateMenu(const QString selectedMenuItem, const QStringList me
 void MainWindow::navigateToMainMenu() {
 
     //handle session interuption
-    // ??cannot display review
     if (currentTimerCount != -1) {
         //Save record and end session
         if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
@@ -507,12 +495,8 @@ void MainWindow::navigateToMainMenu() {
 
 
 void MainWindow::navigateBack() {
-    // needed?
-    //ui->leftButton->blockSignals(true);
-    //ui->rightButton->blockSignals(true);
 
     //handle session interuption
-    // ??cannot display review
     if (currentTimerCount != -1) {
         //Save record
         if (currentMenu->getName() == "START NEW SESSION" && sensorOn== true) {
@@ -602,8 +586,6 @@ void MainWindow::changeBatteryCapacity(double capacity) {
 //Starts/stops the session timer if they are on a session
 void MainWindow::activateSensor(bool checked) {
 
-    //ui->sensorLabel->setPixmap(QPixmap(checked ? ":/icons/sensorOn.svg" : ":/icons/sensorOff.svg"));
-    //ui->sensorComboBox->setCurrentIndex(checked ? 1 : 0);
     sensorOn = checked;
 
     if (currentTimerCount != -1) {
