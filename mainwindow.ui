@@ -89,7 +89,7 @@
       <string/>
      </property>
      <property name="pixmap">
-      <pixmap resource="res/res.qrc">:/check.png</pixmap>
+      <pixmap resource="res/res.qrc">:/img/check.png</pixmap>
      </property>
     </widget>
    </widget>
@@ -108,7 +108,7 @@
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/back.png);
+	border-image: url(:/img/back.png);
 }
 
 QPushButton:pressed {
@@ -134,7 +134,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/menu.png);
+	border-image: url(:/img/menu.png);
 }
 
 QPushButton:pressed {
@@ -160,7 +160,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/up.png);
+	border-image: url(:/img/up.png);
 }
 
 QPushButton:pressed {
@@ -186,7 +186,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/left.png);
+	border-image: url(:/img/left.png);
 }
 
 QPushButton:pressed {
@@ -212,7 +212,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/right.png);
+	border-image: url(:/img/right.png);
 }
 
 QPushButton:pressed {
@@ -238,7 +238,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/down.png);
+	border-image: url(:/img/down.png);
 }
 
 QPushButton:pressed {
@@ -264,7 +264,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/power.png);
+	border-image: url(:/img/power.png);
 }
 
 QPushButton:pressed {
@@ -290,7 +290,7 @@ QPushButton:pressed {
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/select.png);
+	border-image: url(:/img/select.png);
 }
 
 QPushButton:pressed {
@@ -892,7 +892,7 @@ background-color:rgb(239, 41, 41);
     <property name="styleSheet">
      <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/sensor.png);
+	border-image: url(:/img/sensor.png);
 }
 
 QPushButton:pressed {
@@ -959,7 +959,7 @@ QPushButton:pressed {
      <property name="styleSheet">
       <string notr="true">QPushButton {
 	background: none;
-	border-image: url(:/charge.png);
+	border-image: url(:/img/charge.png);
 }
 
 QPushButton:pressed {

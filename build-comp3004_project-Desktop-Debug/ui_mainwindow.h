@@ -25,7 +25,7 @@
 #include <QtWidgets/QStackedWidget>
 #include <QtWidgets/QStatusBar>
 #include <QtWidgets/QWidget>
-#include "src/qcustomplot.h"
+#include "qcustomplot.h"
 
 QT_BEGIN_NAMESPACE
 
@@ -119,14 +119,14 @@ public:
         contact = new QLabel(status);
         contact->setObjectName(QString::fromUtf8("contact"));
         contact->setGeometry(QRect(570, 3, 16, 17));
-        contact->setPixmap(QPixmap(QString::fromUtf8(":/check.png")));
+        contact->setPixmap(QPixmap(QString::fromUtf8(":/img/check.png")));
         backButton = new QPushButton(centralwidget);
         backButton->setObjectName(QString::fromUtf8("backButton"));
         backButton->setEnabled(true);
         backButton->setGeometry(QRect(10, 370, 50, 50));
         backButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/back.png);\n"
+"	border-image: url(:/img/back.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -138,7 +138,7 @@ public:
         menuButton->setGeometry(QRect(560, 370, 50, 50));
         menuButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/menu.png);\n"
+"	border-image: url(:/img/menu.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -150,7 +150,7 @@ public:
         upButton->setGeometry(QRect(280, 440, 50, 50));
         upButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/up.png);\n"
+"	border-image: url(:/img/up.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -162,7 +162,7 @@ public:
         leftButton->setGeometry(QRect(210, 510, 45, 45));
         leftButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/left.png);\n"
+"	border-image: url(:/img/left.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -174,7 +174,7 @@ public:
         rightButton->setGeometry(QRect(350, 510, 45, 45));
         rightButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/right.png);\n"
+"	border-image: url(:/img/right.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -186,7 +186,7 @@ public:
         downButton->setGeometry(QRect(280, 580, 50, 50));
         downButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/down.png);\n"
+"	border-image: url(:/img/down.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -198,7 +198,7 @@ public:
         powerButton->setGeometry(QRect(280, 370, 50, 50));
         powerButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/power.png);\n"
+"	border-image: url(:/img/power.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -210,7 +210,7 @@ public:
         selectButton->setGeometry(QRect(280, 510, 50, 50));
         selectButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/select.png);\n"
+"	border-image: url(:/img/select.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -383,7 +383,7 @@ public:
         sensorButton->setGeometry(QRect(20, 560, 51, 51));
         sensorButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/sensor.png);\n"
+"	border-image: url(:/img/sensor.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"
@@ -408,7 +408,7 @@ public:
         batteryPushButton->setGeometry(QRect(100, 30, 21, 21));
         batteryPushButton->setStyleSheet(QString::fromUtf8("QPushButton {\n"
 "	background: none;\n"
-"	border-image: url(:/charge.png);\n"
+"	border-image: url(:/img/charge.png);\n"
 "}\n"
 "\n"
 "QPushButton:pressed {\n"

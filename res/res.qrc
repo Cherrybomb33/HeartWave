@@ -1,15 +1,15 @@
 <RCC>
     <qresource prefix="/">
-        <file>check.png</file>
-        <file>back.png</file>
-        <file>down.png</file>
-        <file>left.png</file>
-        <file>menu.png</file>
-        <file>right.png</file>
-        <file>up.png</file>
-        <file>power.png</file>
-        <file>select.png</file>
-        <file>charge.png</file>
-        <file>sensor.png</file>
+        <file>img/back.png</file>
+        <file>img/charge.png</file>
+        <file>img/check.png</file>
+        <file>img/down.png</file>
+        <file>img/left.png</file>
+        <file>img/menu.png</file>
+        <file>img/power.png</file>
+        <file>img/right.png</file>
+        <file>img/select.png</file>
+        <file>img/sensor.png</file>
+        <file>img/up.png</file>
     </qresource>
 </RCC>
