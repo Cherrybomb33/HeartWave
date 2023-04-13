@@ -366,7 +366,6 @@ void MainWindow::navigateDownMenu() {
 
 //press selectButton
 void MainWindow::navigateSubMenu() {
-
     if (currentTimerCount != -1) {
         //Save record and end session
         if (currentMenu->getName() == "START NEW SESSION" && sensorOn==true) {
@@ -421,11 +420,11 @@ void MainWindow::navigateSubMenu() {
 
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "DELETE") {
         //currentMenu = currentMenu->get(index);
-        QString datatimeString = currentMenu->getName().left(19); //get datetime Qstring
-        QDateTime datetime = QDateTime::fromString(datatimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
+        QString datetimeString = currentMenu->getName().left(19); //get datetime Qstring
+        QDateTime datetime = QDateTime::fromString(datetimeString, "yyyy-MM-dd HH:mm:ss");   //convert the datetime string to a QDateTime object
 
         for (int i = 0; i < records.size(); i++) {
-            if (records[i]->getStartTime() == datetime) {
+            if (records[i]->getStartTime().toString("yyyy-MM-dd HH:mm:ss") == datetimeString) {
                 database->deleteRecord(datetime);
                 delete records[i];
                 records.remove(i);
