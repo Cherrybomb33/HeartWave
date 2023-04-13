@@ -592,6 +592,10 @@ void MainWindow::activateSensor(bool checked) {
     }
 }
 
+void MainWindow::consumeBattery(double consumption) {
+    changeBatteryCapacity(currentBattery - consumption);
+}
+
 //void MainWindow::changeChallengeLevel(int level) {
 
     //setting->setChallengeLevel(level);
