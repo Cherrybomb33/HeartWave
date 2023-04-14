@@ -159,7 +159,7 @@ void MainWindow::updateSession() {
     consumeBattery(0.5);
     //session can only update when battery is 10% above
     if (currentBattery > 10.0) {
-        currentSession->updateAll();
+        currentSession->updateAll(4);
         updateSessionView();
         plot();
         if (currentTimerCount >= MAX_SESSION_DURATION) {
