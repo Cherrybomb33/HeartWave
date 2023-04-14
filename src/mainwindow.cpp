@@ -372,7 +372,7 @@ void MainWindow::selectAction() {
 
     int index = ui->menuListWidget->currentRow();
     if (index < 0) return;
-    if (currentMenu->getName() == "SETTINGS" && index==1){return;} //handle when user presses select button during BPInterval setting scenario
+    if (currentMenu->getName() == "SETTINGS" && (index==1 || index== 2)){return;} //handle when user presses select button during BPInterval setting scenario
 
     //reset to initial state
     if (currentMenu->getName() == "RESET") {
