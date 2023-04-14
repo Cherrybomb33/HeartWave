@@ -208,7 +208,6 @@ void MainWindow::endSession() {
         newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
         historyMenu->addChildMenu(newHistoryRecord);
         QString newRecordString = newHistoryRecord->getName() + "\n"
-            + "   Challenge Level: Level " + QString::number(newRecord->getchallengeLevel()) + "\n"
             + "   Length: " + QString::number(currentTimerCount / 60)
             + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
         QStringList temp = historyMenu->getMenuOptions();
