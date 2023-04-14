@@ -1,7 +1,7 @@
 #ifndef SETTING_H
 #define SETTING_H
 
-//modify the setting of challenge level, breath pacer and achieve reset functionality
+//modify the setting of challenge level, breath pacer interval and achieve reset functionality
 class Setting {
 
 public:
