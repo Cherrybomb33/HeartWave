@@ -1,6 +1,7 @@
 #include "mainwindow.h"
 #include "ui_mainwindow.h"
 
+//constructor that initializes the main window and its UI components
 MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWindow) {
 
     ui->setupUi(this);
@@ -109,7 +110,7 @@ void MainWindow::initializeMenu(Menu* menu) {
     }
 }
 
-//initializa history menu
+//initialize history menu
 void MainWindow::initializeHistory() {
     //Load records from the database
     allRecords = database->getHistory();
