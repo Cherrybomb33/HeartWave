@@ -1,45 +1,52 @@
 #include "menu.h"
 
-//Constructor that creates a new Menu object
+//constructor
 Menu::Menu(QString name, QStringList menuOptions, Menu* parentMenu)
     : name(name), menuOptions(menuOptions), parentMenu(parentMenu)
 {
     position = -1;
 }
 
-//Destructor that destroys the Menu object and any sub-menu objects it owns
+//destructor that destroys the Menu object and any childmenu objects
 Menu::~Menu() {
     for (Menu* sub : subMenu) {
         delete sub;
     }
 }
 
-//getters
+//getters and setters
+//get the menu name
 QString Menu::getName() {
     return name;
 }
 
-void Menu::setName(QString n){
-    name = n;
-}
-
+//get a list of submenu names
 QStringList Menu::getMenuOptions() {
     return menuOptions;
 }
 
-void Menu::setMenuOptions(QStringList options){
-    menuOptions = options;
-}
-
+//get a pointer to the parent menu
 Menu* Menu::getParentMenu() {
     return parentMenu;
 }
 
+//get the position of the menu in a menu list
 int Menu::getPosition() {
     return position;
 }
 
-//get a pointer to a submenu object at a given index in the submenu list
+//set the menu name
+void Menu::setName(QString n){
+    name = n;
+}
+
+//set the display of menu items of a menu
+void Menu::setMenuOptions(QStringList options){
+    menuOptions = options;
+}
+
+
+//get a pointer to a child menu object at a given index
 Menu* Menu::get(int index) {
     if (index < 0 || index >= subMenu.size()) {
         return nullptr;
@@ -47,7 +54,7 @@ Menu* Menu::get(int index) {
     return subMenu[index];
 }
 
-//add a new submenu object to the sub-menu list of this menu object
+//add a new child menu object to this menu object
 void Menu::addChildMenu(Menu* menu) {
     if (menu != nullptr) {
         menu->position = subMenu.size();
@@ -55,14 +62,15 @@ void Menu::addChildMenu(Menu* menu) {
     }
 }
 
+//delete a child menu of a menu object
 void Menu::deleteChildMenu(Menu* menu) {
     //find the index of the menu to be deleted
     int index = menu->getPosition();
 
-    //remove the menu from the subMenu list
+    //remove the menu from the child menu list
     subMenu.removeAt(index);
 
-    //update the positions of the remaining sub-menus
+    //update the positions of the remaining submenus
     for (int i = index; i < subMenu.size(); i++) {
         subMenu[i]->position = i;
     }
@@ -70,18 +78,17 @@ void Menu::deleteChildMenu(Menu* menu) {
     //remove the menu's name from the menuOptions list
     menuOptions.removeAt(index);
 
-    //delete the menu
     delete menu;
 }
 
+//recursively delete a menu's all submenus
 void Menu::deleteAllSubMenus() {
-    //delete all submenus
     for (Menu* sub : subMenu) {
         sub->deleteAllSubMenus();
         delete sub;
     }
 
-    // Clear the subMenu list and menuOptions list
+    //clear the submenu list and menuOptions list
     subMenu.clear();
     menuOptions.clear();
 }

@@ -51,21 +51,22 @@ private:
     bool bpIsIncreasing;
     
     void setupConnections();
-    void updateMenu(const QString menuName, const QStringList menuOptions);
     void initializeMenu(Menu* menu);   //Dynamically allocate all the menu objects
     void initializeHistory();
     void startSession();  //Display the session page, and initialize data to run the session if user click the sensorOn button
+    void updateSession();
+    void updateSessionView();
+    void endSession();
+    void displayReview(Record *newRecord);
+
     void changePowerStatus(); //Disable UI for power-off, and enable the UI for power-on
     void consumeBattery(double consumption);  //Contains an equation of how much to drain the battery by then calling another function to change it
+    void changeBatteryCapacity(double capacity);
 
-    void updateSession();
+    void updateMenu(const QString menuName, const QStringList menuOptions);
     void plot();
     void plotHistory(Record *Record);
-    void displayReview(Record *newRecord);
     void updateBP(int interval);
-    void endSession();
-    void updateSessionView();
-    void changeBatteryCapacity(double capacity);
     void deleteAction();
     void viewAction(int index);
 
@@ -82,7 +83,6 @@ private slots:
     void parameterMinus();
     
     void activateSensor(bool isOn);   //Start/stop the session timer if they are on a measurement session
-
     void sessionTimerSlot();
 };
 

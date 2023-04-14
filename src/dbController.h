@@ -16,27 +16,27 @@
 #include <QPropertyAnimation>
 #include "record.h"
 
-//Manages interactions between application and database
+//manage interaction between app and database
 class DBController {
 
 public:
     DBController();  //constructor
 
     const QString DATE_FORMAT = "yyyy-MM-dd hh:mm:ss";   //time format in database
-    static const QString DATABASE_PATH;    //path of the database
+    static const QString DATABASE_PATH;                  //path of the database
     
-    QStringList getHistory();    //get a list of QString
-    bool getRecord(const QDateTime& time, Record** record);   //get a Record object
+    QStringList getHistory();
+    bool getRecord(const QDateTime& time, Record** record);
     
-    //add a session record to the database
+
     bool addRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
-    bool deleteRecord(const QDateTime& time);    //delete a record from the database
-    bool reset();   //wipe all records and restore the database to the initial condition
+    bool deleteRecord(const QDateTime& time);
+    bool reset();
 
 private:
-    QSqlDatabase heartwaveDB;    //database object     
+    QSqlDatabase heartwaveDB;
 
-    bool dbInit();    //initialize the database
+    bool dbInit();
     bool isValidRecord(const QDateTime& time,  const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore);
 
 };

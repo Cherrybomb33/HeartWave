@@ -30,6 +30,7 @@ bool DBController::dbInit() {
     }
 
     QSqlQuery query;
+
     //populate table sessionRecords with 2 records if it is not created
     if (!heartwaveDB.tables().contains("sessionRecords")){
         //create table
@@ -61,10 +62,12 @@ QStringList DBController::getHistory() {
     while (query.next()) {
         //get the datetime, and length values from the query result
         QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);
-        int length = query.value(1).toInt();
+        int challengeLevel = query.value(1).toInt();
+        int length = query.value(2).toInt();
 
         //format the QString
         QString newString = datetime.toString(DATE_FORMAT) + "\n"
+            + "   Challenge Level: Level " + QString::number(challengeLevel) + "\n"
             + "   Length: " + QString::number(length / 60)
             + ((length % 60 < 10) ? ":0" + QString::number(length % 60) : ":" + QString::number(length % 60));
 
@@ -226,11 +229,12 @@ bool DBController::addRecord(const QDateTime &time,  const int challengeLevel, c
 bool DBController::reset() {
     QSqlQuery query;
 
+    //close the connection
     if (heartwaveDB.isOpen()) {
-            // Close the connection
-            heartwaveDB.close();
+        heartwaveDB.close();
      }
 
+    //open the connection
     if (!heartwaveDB.open()) {
         throw "Error: Database could not be opened";
     }
@@ -242,21 +246,16 @@ bool DBController::reset() {
     }
 
     //delete all records from the sessionRecords table
-    //query.prepare("DELETE FROM sessionRecords;");
     if (!query.exec("DELETE FROM sessionRecords;")) {
         qDebug() << "Error: Failed to delete all records from sessionRecords:" << query.lastError().text();
         heartwaveDB.rollback();
         return false;
     }
 
+    //delete the sessionRecords table
     if (!query.exec("DROP TABLE IF EXISTS sessionRecords;")) {
         qDebug() << "Error deleting table sessionRecords:" << query.lastError().text();
     }
-
-    //if (!query.exec("INSERT OR REPLACE INTO sessionRecords VALUES ('2023-04-06 11:03:08', 108, 50.5, 45.2, 4.3, 3.6, 55.3, '0.61,92;1.24,89;1.84,87;2.43,90;3.03,91;3.64,92;4.26,89;4.87,87;5.47,90;6.08,91;6.69,92;7.31,89;7.92,87;8.52,90;9.13,91;9.74,92;10.36,89;10.97,87;11.57,90;12.18,91;12.79,92;13.41,89;14.02,87;14.62,90;15.23,91;15.84,92;16.46,89;17.07,87;17.67,90;18.28,91;18.89,92;19.51,89;20.12,87;20.72,90;21.33,91;21.94,92;22.56,89;23.17,87;23.77,90;24.38,91;24.99,92;25.61,89;26.22,87;26.82,90;27.43,91;28.04,92;28.66,89;29.27,87;29.87,90;30.48,91;31.09,92;31.71,89;32.32,87;32.92,90;33.53,91;34.14,92;34.76,89;35.37,87;35.97,90;36.58,91;37.19,92;37.81,89;38.42,87;39.02,90;39.63,91;40.24,92;40.86,89;41.47,87;42.07,90;42.68,91;43.29,92;43.91,89;44.52,87;45.12,90;45.73,91;46.34,92;46.96,89;47.57,87;48.17,90;48.78,91;49.39,92;50.01,89;50.62,87;51.22,90;51.83,91;52.44,92;53.06,89;53.67,87;54.27,90;54.88,91;55.49,92;56.11,89;56.72,87;57.32,90;57.93,91;58.54,92;59.16,89;59.77,87;60.37,90;60.98,91;61.59,92;62.21,89;62.82,87;63.42,90;64.03,91;64.64,92;65.26,89;65.87,87;66.47,90;67.08,91;67.69,92;68.31,89;68.92,87;69.52,90;70.13,91;70.74,92;71.36,89;71.97,87;72.57,90;73.18,91;73.79,92;74.41,89;75.02,87;75.62,90;76.23,91;76.84,92;77.46,89;78.07,87;78.67,90;79.28,91;79.89,92;80.51,89;81.12,87;81.72,90;82.33,91;82.94,92;83.56,89;84.17,87;84.77,90;85.38,91;85.99,92;86.61,89;87.22,87;87.82,90;88.43,91;89.04,92;89.66,89;90.27,87;90.87,90;91.48,91;92.09,92;92.71,89;93.32,87;93.92,90;94.53,91;95.14,92;95.76,89;96.37,87;96.97,90;97.58,91;98.19,92;98.81,89;99.42,87;100.02,90;100.63,91;101.24,92;101.86,89;102.47,87;103.07,90;103.68,91;104.29,92;104.91,89;105.52,87;106.12,90;106.73,91;107.34,92;107.96,89;');")){
-        //qDebug() << "Error inserting second record:" << query.lastError().text();
-        //return false;
-    //}
 
     //commit the transaction
     if (!heartwaveDB.commit()) {
