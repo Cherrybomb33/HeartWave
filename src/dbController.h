@@ -29,7 +29,7 @@ public:
     bool getRecord(const QDateTime& time, Record** record);   //get a Record object
     
     //add a session record to the database
-    bool addRecord(const QDateTime& time, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
+    bool addRecord(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
     bool deleteRecord(const QDateTime& time);    //delete a record from the database
     bool reset();   //wipe all records and restore the database to the initial condition
 
@@ -37,7 +37,7 @@ private:
     QSqlDatabase heartwaveDB;    //database object     
 
     bool dbInit();    //initialize the database
-    bool isValidRecord(const QDateTime& time, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore);
+    bool isValidRecord(const QDateTime& time,  const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore);
 
 };
 

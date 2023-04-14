@@ -24,6 +24,6 @@ void Setting::setBpInterval(int bpInterval) {
 
 //reset the configuration to the initial state
 void Setting::reset(){
-    //setChallengeLevel(1);
+    setChallengeLevel(1);
 	setBpInterval(10);
 }

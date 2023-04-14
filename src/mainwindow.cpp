@@ -17,6 +17,7 @@ MainWindow::~MainWindow() {
         delete records[i];
     }
 
+    delete setting;
     delete database;
 }
 
@@ -83,7 +84,8 @@ void MainWindow::initializeMenu(Menu* menu) {
 
     //create submenu options of setting
     settingList.append("RESET");
-    settingList.append("BREATH PACER INTERVAL:  10");
+    settingList.append("BREATH PACER INTERVAL: 10");
+    settingList.append("CHALLENGE LEVEL: 1");
 
     //create submenu options of history
     Menu* sessionMenu = new Menu("START NEW SESSION", {}, menu);
@@ -159,7 +161,8 @@ void MainWindow::updateSession() {
     consumeBattery(0.5);
     //session can only update when battery is 10% above
     if (currentBattery > 10.0) {
-        currentSession->updateAll(4);
+//        currentSession->updateAll(4);
+        currentSession->updateAll(setting->getChallengeLevel());
         updateSessionView();
         plot();
         if (currentTimerCount >= MAX_SESSION_DURATION) {
@@ -185,11 +188,11 @@ void MainWindow::endSession() {
     }
 
     //save new record to database and check its validity
-    bool flag = database->addRecord(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
+    bool flag = database->addRecord(currentSession->getStartTime(),setting->getChallengeLevel(),currentTimerCount, currentSession->getLowPercentage(),
                         currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                         (currentSession->getAchievementScore()*5)/currentSession->getLength(),
                         currentSession->getAchievementScore(), *(currentSession->getHRVData()));
-    Record* newRecord = new Record(currentSession->getStartTime(),currentTimerCount, currentSession->getLowPercentage(),
+    Record* newRecord = new Record(currentSession->getStartTime(),setting->getChallengeLevel(),currentTimerCount, currentSession->getLowPercentage(),
                                    currentSession->getmediumPercentage(), currentSession->getHighPercentage(),
                                    currentSession->getAchievementScore()*5/currentSession->getLength(),
                                    currentSession->getAchievementScore(), *(currentSession->getHRVData()));
@@ -205,6 +208,7 @@ void MainWindow::endSession() {
         newHistoryRecord->addChildMenu(new Menu("DELETE", {}, newHistoryRecord));
         historyMenu->addChildMenu(newHistoryRecord);
         QString newRecordString = newHistoryRecord->getName() + "\n"
+            + "   Challenge Level: Level " + QString::number(newRecord->getchallengeLevel()) + "\n"
             + "   Length: " + QString::number(currentTimerCount / 60)
             + ((currentTimerCount % 60 < 10) ? ":0" + QString::number(currentTimerCount % 60) : ":" + QString::number(currentTimerCount % 60));
         QStringList temp = historyMenu->getMenuOptions();
@@ -267,6 +271,7 @@ void MainWindow::displayReview(Record* newRecord) {
     ui->avgScore->setText(QString::number(newRecord->getAverageCoherence(),'f',2));
     ui->achScore->setText(QString::number(newRecord->getAchievementScore(),'f',2));
     ui->lenScore->setText(QString::number(newRecord->getLength())+"s");
+    ui->chaLvl->setText(QString::number(newRecord->getchallengeLevel()));
     ui->lowPercentage->setText(QString::number(newRecord->getLowPercentage(),'f',2)+"%");
     ui->lowPercentage->setStyleSheet("color: #a40000;");
     ui->mediumPercentage->setText(QString::number(newRecord->getMedPercentage(),'f',2)+"%");
@@ -517,7 +522,7 @@ void MainWindow::backToPrevious() {
 
 void MainWindow::parameterPlus() {
     int index = ui->menuListWidget->currentRow();
-    //int currentChallengeLevel = setting->getChallengeLevel();
+    int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
     if (currentMenu->getName() == "SETTINGS"){
@@ -527,10 +532,24 @@ void MainWindow::parameterPlus() {
             QStringList settingList;
             settingList.append("RESET");
             settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+            settingList.append("CHALLENGE LEVEL: " + (QString::number(setting->getChallengeLevel())));
 
             ui->menuListWidget->clear();
             ui->menuListWidget->addItems(settingList);
             ui->menuListWidget->setCurrentRow(1);
+            ui->menuLabel->setText(currentMenu->getName());
+            currentMenu->setMenuOptions(settingList);
+        }else if (index == 2 && currentChallengeLevel <=3){
+            setting->setChallengeLevel(currentChallengeLevel+1);
+
+            QStringList settingList;
+            settingList.append("RESET");
+            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+            settingList.append("CHALLENGE LEVEL: " + (QString::number(setting->getChallengeLevel())));
+
+            ui->menuListWidget->clear();
+            ui->menuListWidget->addItems(settingList);
+            ui->menuListWidget->setCurrentRow(2);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
         }
@@ -541,7 +560,7 @@ void MainWindow::parameterPlus() {
 void MainWindow::parameterMinus() {
 
     int index = ui->menuListWidget->currentRow();
-    //int currentChallengeLevel = setting->getChallengeLevel();
+    int currentChallengeLevel = setting->getChallengeLevel();
     int currentBpInterval = setting->getBpInterval();
 
     if (currentMenu->getName() == "SETTINGS"){
@@ -551,10 +570,24 @@ void MainWindow::parameterMinus() {
             QStringList settingList;
             settingList.append("RESET");
             settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+            settingList.append("CHALLENGE LEVEL: " + (QString::number(setting->getChallengeLevel())));
 
             ui->menuListWidget->clear();
             ui->menuListWidget->addItems(settingList);
             ui->menuListWidget->setCurrentRow(1);
+            ui->menuLabel->setText(currentMenu->getName());
+            currentMenu->setMenuOptions(settingList);
+        }else if (index == 2 && currentChallengeLevel >1){
+            setting->setChallengeLevel(currentChallengeLevel-1);
+
+            QStringList settingList;
+            settingList.append("RESET");
+            settingList.append("BREATH PACER INTERVAL: " + (QString::number(setting->getBpInterval())));
+            settingList.append("CHALLENGE LEVEL: " + (QString::number(setting->getChallengeLevel())));
+
+            ui->menuListWidget->clear();
+            ui->menuListWidget->addItems(settingList);
+            ui->menuListWidget->setCurrentRow(2);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
         }
@@ -595,12 +628,6 @@ void MainWindow::activateSensor(bool checked) {
 void MainWindow::consumeBattery(double consumption) {
     changeBatteryCapacity(currentBattery - consumption);
 }
-
-//void MainWindow::changeChallengeLevel(int level) {
-
-    //setting->setChallengeLevel(level);
-    //ui->ChallengeLevelLabel->setText("Challenge Level: " + QString::number(level));
-//}
 
 void MainWindow::plot() {
     QVector<QPointF>* points = currentSession->getHRVData();
@@ -648,11 +675,13 @@ void MainWindow::updateBP(int interval) {
     if (bpIsIncreasing) {
         bpProgress += (200/interval);
         if (bpProgress >= 100) {
+            bpProgress = 100;
             bpIsIncreasing = false;
         }
     } else {
         bpProgress -= (200/interval);
         if (bpProgress <= 0) {
+            bpProgress = 0;
             bpIsIncreasing = true;
         }
     }

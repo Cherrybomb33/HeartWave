@@ -373,7 +373,7 @@ background-color:rgb(239, 41, 41);
      <string notr="true">background-color:rgb(255, 255, 255)</string>
     </property>
     <property name="currentIndex">
-     <number>0</number>
+     <number>1</number>
     </property>
     <widget class="QWidget" name="sessionView">
      <widget class="QLabel" name="coherenceLabel">
@@ -543,7 +543,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>50</y>
+        <y>45</y>
         <width>101</width>
         <height>16</height>
        </rect>
@@ -564,7 +564,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>80</y>
+        <y>70</y>
         <width>141</width>
         <height>16</height>
        </rect>
@@ -585,7 +585,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>110</y>
+        <y>95</y>
         <width>51</width>
         <height>16</height>
        </rect>
@@ -606,7 +606,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>140</y>
+        <y>145</y>
         <width>181</width>
         <height>16</height>
        </rect>
@@ -627,7 +627,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>160</y>
+        <y>170</y>
         <width>41</width>
         <height>16</height>
        </rect>
@@ -648,7 +648,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>410</x>
-        <y>190</y>
+        <y>195</y>
         <width>61</width>
         <height>16</height>
        </rect>
@@ -690,7 +690,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>520</x>
-        <y>50</y>
+        <y>45</y>
         <width>54</width>
         <height>17</height>
        </rect>
@@ -710,7 +710,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>550</x>
-        <y>80</y>
+        <y>70</y>
         <width>51</width>
         <height>16</height>
        </rect>
@@ -730,7 +730,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>470</x>
-        <y>110</y>
+        <y>95</y>
         <width>61</width>
         <height>17</height>
        </rect>
@@ -750,7 +750,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>450</x>
-        <y>160</y>
+        <y>170</y>
         <width>71</width>
         <height>17</height>
        </rect>
@@ -770,7 +770,7 @@ background-color:rgb(239, 41, 41);
       <property name="geometry">
        <rect>
         <x>480</x>
-        <y>190</y>
+        <y>195</y>
         <width>71</width>
         <height>17</height>
        </rect>
@@ -855,6 +855,47 @@ background-color:rgb(239, 41, 41);
         <width>361</width>
         <height>221</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="chaLvlLabel">
+      <property name="geometry">
+       <rect>
+        <x>410</x>
+        <y>120</y>
+        <width>111</width>
+        <height>16</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>System-ui</family>
+        <pointsize>9</pointsize>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>Challenge Level:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="chaLvl">
+      <property name="geometry">
+       <rect>
+        <x>530</x>
+        <y>120</y>
+        <width>16</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="font">
+       <font>
+        <family>System-ui</family>
+        <weight>75</weight>
+        <bold>true</bold>
+       </font>
+      </property>
+      <property name="text">
+       <string>0</string>
       </property>
      </widget>
     </widget>

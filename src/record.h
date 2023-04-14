@@ -11,11 +11,11 @@
 class Record {
 
 public:
-    Record(const QDateTime& time, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
+    Record(const QDateTime& time, const int challengeLevel, const int length, const double lowPercentage, const double medPercentage, const double highPercentage, const double averageCoherence, const double achievementScore, const QVector<QPointF>& hrvGraph);
 
     QString toString();
     QDateTime getStartTime();
-//    int getchallengeLevel();
+    int getchallengeLevel();
     double getLowPercentage(); 
     double getMedPercentage(); 
     double getHighPercentage(); 
@@ -26,7 +26,7 @@ public:
 
 private:
     QDateTime startTime;
-//    int challengeLevel;
+    int challengeLevel;
     double lowPercentage;
     double medPercentage;
     double highPercentage;
