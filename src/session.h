@@ -36,27 +36,18 @@ class Session: public QObject {
 
         void setLength(double length); // setter function to set the length of the session
         void setAchievementScore(double achievementScore); // setter function to set the achievement score of the session
-        void setHRContact(bool);       // setter function to set whether HR contact is on
 
         QVector<double>* simulateHeartIntervals(double timeLimit);   //generate random heart beat intervals up to the limit
         QVector<QPointF> *calPoints(QVector<double> **times);
-        void calCLPercentage();  // calculate percentage of time in different coherence levels. eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
-        void updateCoherenceScore();  // function to update the coherence score of the session
-        void updateAchievementScore(); // function to update the achievement score of the session
-        void updateCoherenceLevel(); //function to update the coherence level of the session
         void updateHRVData(QVector<QPointF>* newData);  // function to update the HRV data of the session
-        bool isHRContactOn();  // to check if HR contact is on
-        void beep();  // function to emit a beep signal
-
-    public slots:
-        void updateAll();
+        void calCLPercentage();  // calculate percentage of time in different coherence levels. eg: lowPercentage = lowCount /(lowCount + mediumCount + highCount)
+        void updateAll(int challenLvl);
     private:
         QDateTime startTime;
         double length;  // the length of the session
         QTimer* timer;
         double coherenceScore; // the coherence score of the session
         double achievementScore; // the achievement score of the session
-        bool isHRContact; // whether HR contact is on
         int coherenceLevel; // the coherence level of the session (0-1 is low, 1-2 is medium, >=2 is high)
         int lowCount; // the count of low coherence levels
         int mediumCount; // the count of medium coherence levels
@@ -68,5 +59,11 @@ class Session: public QObject {
         double lostTime; // hold the time gap to compensate between all rounds of input generation
 
         double generateRandomDouble(double min, double max); //generate random data
+
+        void updateCoherenceScore();  // function to update the coherence score of the session
+        void updateAchievementScore(); // function to update the achievement score of the session
+        void updateCoherenceLevel(int challenLvl); //function to update the coherence level of the session
+
+        void beep();  // function to emit a beep signal
 };
 #endif
