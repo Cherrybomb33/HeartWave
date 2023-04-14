@@ -59,14 +59,12 @@ QStringList DBController::getHistory() {
 
     //iterate the results of the SELECT statement
     while (query.next()) {
-        //get the datetime, challengelevel, and length values from the query result
+        //get the datetime, and length values from the query result
         QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);
-        int challengeLevel = query.value(1).toInt();
-        int length = query.value(2).toInt();
+        int length = query.value(1).toInt();
 
         //format the QString
         QString newString = datetime.toString(DATE_FORMAT) + "\n"
-            + "   Challenge Level: Level " + QString::number(challengeLevel) + "\n"
             + "   Length: " + QString::number(length / 60)
             + ((length % 60 < 10) ? ":0" + QString::number(length % 60) : ":" + QString::number(length % 60));
 
