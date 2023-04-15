@@ -18,6 +18,7 @@ MainWindow::~MainWindow() {
         delete records[i];
     }
 
+    delete batteryTimer;
     delete setting;
     delete database;
 }
@@ -29,6 +30,7 @@ void MainWindow::setupConnections(){
     bpProgress = 0;
     bpIsIncreasing = true;
     currentBattery = 100.0;
+    batteryTimer = new QTimer();
     currentSession = nullptr;
     setting = new Setting();
 
@@ -63,6 +65,9 @@ void MainWindow::setupConnections(){
 
     //connect the battery level spinbox to the changeBatteryCapacity slot
     connect(ui->batterySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
+
+    //Initialize battery consumption timer
+    connect(batteryTimer, &QTimer::timeout, [this] () {consumeBattery(0.2);});
 
     //connect interface buttons to their corresponding slots
     connect(ui->upButton, &QPushButton::pressed, this, &MainWindow::scrollUp);
@@ -164,6 +169,7 @@ void MainWindow::startSession() {
     //start the session timer if the sensor is on
     if (sensorOn == true) {
         sessionTimer->start(1000);
+        batteryTimer->stop();
     }
 }
 
@@ -188,7 +194,7 @@ void MainWindow::updateSession() {
     consumeBattery(0.5);
 
     //session can only update when battery is above 15%
-    if (currentBattery > 10.0) {
+    if (currentBattery > 15.0) {
         //update session data,session vew and HRV graph
         currentSession->updateAll(setting->getChallengeLevel());
         updateSessionView();
@@ -199,7 +205,7 @@ void MainWindow::updateSession() {
             endSession();
         }
     }else {
-        qDebug() << "Battery is under 10%, this session cannot continue, please charge";
+        qDebug() << "Battery is under 15%, this session cannot continue, please charge";
         endSession();
     }
 }
@@ -210,6 +216,8 @@ void MainWindow::endSession() {
     //stop and disconnect the session timer
     currentSession->getTimer()->stop();
     currentSession->getTimer()->disconnect();
+
+    batteryTimer->start(10000);
 
     //calculate coherence level percentages
     currentSession->calCLPercentage();
@@ -361,11 +369,16 @@ void MainWindow::changePowerStatus() {
     ui->sensorButton->setEnabled(powerOn);
 }
 
-//toggles the power state of the device and handle power off events during a session
+//toggle the power state of the device and handle power off events during a session
 void MainWindow::powerSwitch() {
     if (currentBattery > 0) {
         powerOn = !powerOn;
         changePowerStatus();
+        if (powerOn) {
+            batteryTimer->start(10000);
+        }else {
+            batteryTimer->stop();
+        }
     }
 
     //handle poweroff event during session measurement
@@ -479,8 +492,8 @@ void MainWindow::selectAction() {
         qDebug() << "Enter child menu " + currentMenu->getName();
      //if user chooses the start a session option
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
-        if (currentBattery <= 10.0) {
-            qDebug()<<"Battery is under 10%, cannot start a new session, please charge";
+        if (currentBattery <= 15.0) {
+            qDebug()<<"Battery is under 15%, cannot start a new session, please charge";
             return;
         }
 
@@ -721,6 +734,17 @@ void MainWindow::changeBatteryCapacity(double capacity) {
         }
         powerSwitch();
         currentBattery = 0;
+        ui->battery->setValue(currentBattery);
+        ui->batterySpinBox->setValue(currentBattery);
+    }
+
+    //change the color of battery indicator based on current battery capacity
+    if (currentBattery < 15.0) {
+        ui->battery->setStyleSheet("QProgressBar { selection-background-color: rgb(164, 0, 0);}");
+    }else if (currentBattery < 30.0){
+        ui->battery->setStyleSheet("QProgressBar { selection-background-color: rgb(196, 160, 0);}");
+    }else {
+        ui->battery->setStyleSheet("QProgressBar { selection-background-color: rgb(0, 150, 0);}");
     }
 }
 
@@ -732,11 +756,13 @@ void MainWindow::activateSensor(bool checked) {
         //if the sensor is off, stop the session timer
         if (!sensorOn) {
             currentSession->getTimer()->stop();
+            batteryTimer->start(10000);
             qDebug() << "Sensor is off, HR contact is off. The measurement stops.";
         }
         //if the sensor is on, start the session timer with a 1000ms interval
         else {
             currentSession->getTimer()->start(1000);
+            batteryTimer->stop();
             qDebug() << "Sensor is on, HR contact is on. The measurement starts.";
         }
         ui->contact->setVisible(sensorOn);
