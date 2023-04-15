@@ -96,7 +96,7 @@ bool DBController::getRecord(const QDateTime& time, Record** record){
 
     //check if a record with the specified datetime exists
     if (query.next()) {
-        // if the record exists, extract the values from the query result
+        //if the record exists, extract the values from the query result
         QDateTime datetime = QDateTime::fromString(query.value(0).toString(), DATE_FORMAT);
         int challengeLevel = query.value(1).toInt();
         int length = query.value(2).toInt();
@@ -107,7 +107,7 @@ bool DBController::getRecord(const QDateTime& time, Record** record){
         double achievementScore = query.value(7).toDouble();
         QString hrvGraphString = query.value(8).toString();
 
-        // Convert the hrvGraphString to QVector<QPointF>
+        //convert the hrvGraphString to QVector<QPointF>
         QVector<QPointF> hrvGraph;
         QStringList hrvGraphStringList = hrvGraphString.split(";");
         for (const QString& pointString : hrvGraphStringList) {
@@ -118,7 +118,7 @@ bool DBController::getRecord(const QDateTime& time, Record** record){
             }
         }
 
-        // Create a new Record object with the extracted values
+        //create a new Record object with the extracted values
         *record = new Record(datetime, challengeLevel, length, lowPercentage, medPercentage, highPercentage, averageCoherence, achievementScore, hrvGraph);
 
         return true;

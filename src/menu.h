@@ -20,8 +20,8 @@ public:
     int getPosition();
     void setName(QString n);
     void setMenuOptions(QStringList options);
-    Menu* get(int);
-    void addChildMenu(Menu*);
+    Menu* get(int index);
+    void addChildMenu(Menu* menu);
     void deleteChildMenu(Menu* menu);
     void deleteAllSubMenus();
 

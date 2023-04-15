@@ -7,7 +7,7 @@
 #include <QVector>
 #include <QPointF>
 
-//To store information about a session connecting the database and mainwindow
+//store information about a session connecting the database and mainwindow
 class Record {
 
 public:
