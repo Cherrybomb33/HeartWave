@@ -3,7 +3,7 @@
 //file path for the SQLite database file "heartwave.db"
 const QString DBController::DATABASE_PATH = "/database/heartwave.db";
 
-//constructor that creates a DBController managing hearwave database
+//constructor that creates a DBController managing heartwave database
 DBController::DBController() {
     //creates a new database connection object with the SQLite driver type
     //which allows connection and interacttion with an SQLite database
