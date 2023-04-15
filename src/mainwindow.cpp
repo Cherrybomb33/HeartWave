@@ -148,7 +148,7 @@ void MainWindow::initializeHistory() {
 //the function starts a new session, initializing and displaying the session view.
 //It also sets up the timer and connects it to update session data periodically.
 void MainWindow::startSession() {
-    //create a Session object and display the session view
+    //create a Session object
     currentSession = new Session();
 
     //set initial visibility for labels and widgets
@@ -161,7 +161,7 @@ void MainWindow::startSession() {
     ui->stackedWidget->setCurrentIndex(0);
     plot(); //generate initial empty plot
 
-    //connect session timer to update all session data
+    //connect session timer to update all session data and session view
     QTimer* sessionTimer = currentSession->getTimer();
     currentTimerCount = 0;
     connect(sessionTimer, &QTimer::timeout, this, &MainWindow::sessionTimerSlot);
@@ -174,6 +174,7 @@ void MainWindow::startSession() {
 }
 
 //slot function for the session timer
+//this slot function is responsible for updating session and breath pacer
 void MainWindow::sessionTimerSlot() {
     currentTimerCount++;
 
@@ -210,7 +211,7 @@ void MainWindow::updateSession() {
     }
 }
 
-//end the current session, stopp the timer and calculate the percentage of coherence levels
+//end the current session, stop the timer and calculate the percentage of coherence levels
 //save the session data to database and Record and display a review
 void MainWindow::endSession() {
     //stop and disconnect the session timer
@@ -772,6 +773,7 @@ void MainWindow::activateSensor(bool checked) {
 //decrease the battery capacity based on the given consumption value
 void MainWindow::consumeBattery(double consumption) {
     changeBatteryCapacity(currentBattery - consumption);
+    if (currentBattery < 15.0 && powerOn) {qDebug("Battery is under 15%, need to be charged");}
 }
 
 //plot the HRV graph during a session measurement
