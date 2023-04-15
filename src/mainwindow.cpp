@@ -25,7 +25,7 @@ MainWindow::~MainWindow() {
 
 //set up the connections and initialize menu, database, setting, and UI elements
 void MainWindow::setupConnections(){
-    // Initialize member variables
+    //initialize member variables
     currentTimerCount = -1;
     bpProgress = 0;
     bpIsIncreasing = true;
@@ -40,7 +40,7 @@ void MainWindow::setupConnections(){
     //create database connection
     database = new DBController();
 
-    //Load records from the database
+    //load records from the database
     initializeHistory();
 
     //create and initialize the main menu tree
@@ -48,7 +48,7 @@ void MainWindow::setupConnections(){
     mainMenu = currentMenu;
     initializeMenu(currentMenu);
 
-    // Initialize the main menu view
+    //initialize the main menu view
     ui->menuListWidget->addItems(currentMenu->getMenuOptions());
     ui->menuListWidget->setCurrentRow(0);
     ui->menuLabel->setText(currentMenu->getName());
@@ -66,7 +66,7 @@ void MainWindow::setupConnections(){
     //connect the battery level spinbox to the changeBatteryCapacity slot
     connect(ui->batterySpinBox, QOverload<double>::of(&QDoubleSpinBox::valueChanged), this, &MainWindow::changeBatteryCapacity);
 
-    //Initialize battery consumption timer
+    //initialize battery consumption timer
     connect(batteryTimer, &QTimer::timeout, [this] () {consumeBattery(0.2);});
 
     //connect interface buttons to their corresponding slots
@@ -81,7 +81,7 @@ void MainWindow::setupConnections(){
     //connect sensor button to toggle sensor activation
     connect(ui->sensorButton, &QPushButton::clicked, [this]() {activateSensor(!sensorOn);});
 
-    // Initialize battery levels
+    //initialize battery levels
     ui->batterySpinBox->setValue(currentBattery);
     
     //set initial visibility for stacked widget and labels
@@ -178,17 +178,17 @@ void MainWindow::startSession() {
 void MainWindow::sessionTimerSlot() {
     currentTimerCount++;
 
-    // change length in sessionView and update breath pacer every 1 second
+    //change length in sessionView and update breath pacer every 1 second
     ui->lengthValue->setText(QString("%1:%2").arg(QString::number(currentTimerCount / 60),2,'0').arg(QString::number(currentTimerCount % 60),2,'0'));
     updateBP(setting->getBpInterval());
 
-    // update session data every 5 seconds
+    //update session data every 5 seconds
     if (currentTimerCount % 5 == 0 && currentBattery > 0) {
         updateSession();
     }
 }
 
-//Update the current session, including battery consumption, session data, and the session view.
+//update the current session, including battery consumption, session data, and the session view.
 //It also checks whether the session has reached maximum duration or if the batterylevel is too low to continue.
 void MainWindow::updateSession() {
     //consume battery during the session
@@ -571,7 +571,7 @@ void MainWindow::updateMenu(const QString menuName, const QStringList menuOption
     ui->menuLabel->setStyleSheet("QLabel { font-weight: 600; color: #e9b96e; qproperty-alignment: 'AlignHCenter | AlignVCenter'; background-color: white;}");
 }
 
-//mainMenu button slot, which navigates the user interface back to the main menu
+//MainMenu button slot, which navigates the user interface back to the main menu
 void MainWindow::backToMainMenu() {
 
     //handle session interuption
