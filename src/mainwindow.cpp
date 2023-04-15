@@ -130,6 +130,7 @@ void MainWindow::initializeHistory() {
 void MainWindow::startSession() {
     //display the session view
     currentSession = new Session();
+    ui->sensorButton->setDisabled(false);
     ui->lowLabel->setVisible(false);
     ui->medLabel->setVisible(false);
     ui->highLabel->setVisible(false);
@@ -232,10 +233,15 @@ void MainWindow::endSession() {
     ui->coherenceValue->setText("0.00");
     ui->lengthValue->setText("00:00");
     ui->achievementScore->setText("0.00");
+    ui->sensorButton->setDisabled(true);
 
     //display review right after session ends if this record is valid
-    if (flag) {displayReview(newRecord);}
-    else {backToPrevious();}
+    if (flag) {
+        qDebug() << "Session ends.";
+        displayReview(newRecord);
+    }else {
+        backToMainMenu();
+    }
 }
 
 void MainWindow::updateSessionView() {
@@ -357,7 +363,9 @@ void MainWindow::scrollUp() {
     }
 
     ui->menuListWidget->setCurrentRow(nextIndex);
-    qDebug() << "Move to previous option";
+    if (currentMenu->getName()!= "START NEW SESSION" && currentMenu->getName()!= "VIEW"){
+        qDebug() << "Move to previous option";
+    }
 }
 
 //press down button
@@ -370,7 +378,9 @@ void MainWindow::scrollDown() {
     }
 
     ui->menuListWidget->setCurrentRow(nextIndex);
-    qDebug() << "Move to next option";
+    if (currentMenu->getName()!= "START NEW SESSION" && currentMenu->getName()!= "VIEW"){
+        qDebug() << "Move to next option";
+    }
 }
 
 //press selectButton
@@ -396,7 +406,6 @@ void MainWindow::selectAction() {
     //reset to initial state
     if (currentMenu->getName() == "RESET") {
         if (currentMenu->getMenuOptions()[index] == "YES") {
-            //resetAction();
             for (int i = 0; i < records.size(); i++) {
                 delete records[i];
             }
@@ -436,7 +445,7 @@ void MainWindow::selectAction() {
         //Update new menu info
         currentMenu = currentMenu->get(index);
         updateMenu("Measuring", {});
-        qDebug() << "Started a new session, sensor is off, HR contact is off.";
+        qDebug() << "Started a new session, sensor is off, HR contact is off. Please press sensor button to start measuring.";
         startSession();
     }
     //delete a record
@@ -514,7 +523,11 @@ void MainWindow::backToMainMenu() {
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
-    qDebug() << "Back to main menu.";
+    if (currentMenu->getName()!= "MAIN MENU"){
+        qDebug() << "Back to main menu.";
+    }else{
+        return;
+    }
 }
 
 
@@ -531,15 +544,17 @@ void MainWindow::backToPrevious() {
 
     if (currentMenu->getName() == "MAIN MENU") {
         ui->menuListWidget->setCurrentRow(0);
+        qDebug() << "Already at main menu.";
     }
     else {
         currentMenu = currentMenu->getParentMenu();
         updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+        qDebug() << "Back to previous menu.";
     }
 
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
-    qDebug() << "Back to previous menu.";
+
 }
 
 
@@ -648,9 +663,11 @@ void MainWindow::activateSensor(bool checked) {
     if (currentTimerCount != -1) {
         if (!sensorOn) {
             currentSession->getTimer()->stop();
+            qDebug() << "Sensor is off, HR contact is off. The measurement stops.";
         }
         else {
             currentSession->getTimer()->start(1000);
+            qDebug() << "Sensor is on, HR contact is on. The measurement starts.";
         }
         ui->contact->setVisible(sensorOn);
     }
