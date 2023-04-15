@@ -39,6 +39,7 @@ private:
 
     Ui::MainWindow *ui;   //pointer to the UI object for the main window
     QVector<Record*> records;   //a vector holding pointers to Record objects
+    QTimer* batteryTimer;   //a timer for consuming battery
 
     QStringList allRecords;   //A list of QStrings where each is the string representation of a Record object
     Session* currentSession;  //pointer to the current running measurement session
