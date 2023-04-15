@@ -87,7 +87,7 @@ private slots:
     void parameterMinus(); //decrease a parameter value
     
     void activateSensor(bool isOn);   //start or stop the session timer during a measurement session
-    void sessionTimerSlot();          //slot function for the session timer
+    void sessionTimerSlot();          //slot function for the session timer, this is responsible for updating session and breath pacer
 };
 
 #endif
