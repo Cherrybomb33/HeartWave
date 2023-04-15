@@ -10,7 +10,7 @@ MainWindow::MainWindow(QWidget *parent) : QMainWindow(parent), ui(new Ui::MainWi
 
 //destructor
 MainWindow::~MainWindow() {
-    //mainMenu->deleteAllSubMenus();
+    mainMenu->deleteAllSubMenus();
     delete mainMenu;
     delete ui;
 
@@ -284,6 +284,8 @@ void MainWindow::displayReview(Record* newRecord) {
     plotHistory(newRecord);
     ui->stackedWidget->setVisible(true);
     ui->stackedWidget->setCurrentIndex(1);
+
+    qDebug() << "Display the record review.";
 }
 
 //Disable user UI for power-off, and enable user UI for power-on
@@ -294,7 +296,7 @@ void MainWindow::changePowerStatus() {
     ui->status->setVisible(powerOn);   //display battery level and sensor detector
     ui->stackedWidget->setVisible(powerOn);
 
-    //Remove this if we want the menu to stay in the same position when the power is off
+    //Ensure the device stay on main page when power is on
     if (powerOn) {
         MainWindow::backToMainMenu();
         ui->sensorButton->setChecked(false);
@@ -328,6 +330,13 @@ void MainWindow::powerSwitch() {
 
         activateSensor(false);
     }
+
+    //print the message to the console for user interation
+    if (powerOn){
+        qDebug()<< "The device has been turned on." ;
+    }else {
+        qDebug()<< "The device has been turned off." ;
+    }
 }
 
 
@@ -335,6 +344,7 @@ void MainWindow::chargeBattery() {
 
     int fullyCharged = 100;
     changeBatteryCapacity(fullyCharged);
+    qDebug() << "The battery has been charged to full capacity.";
 }
 
 //press up button
@@ -347,6 +357,7 @@ void MainWindow::scrollUp() {
     }
 
     ui->menuListWidget->setCurrentRow(nextIndex);
+    qDebug() << "Move to previous option";
 }
 
 //press down button
@@ -359,6 +370,7 @@ void MainWindow::scrollDown() {
     }
 
     ui->menuListWidget->setCurrentRow(nextIndex);
+    qDebug() << "Move to next option";
 }
 
 //press selectButton
@@ -373,8 +385,13 @@ void MainWindow::selectAction() {
     }
 
     int index = ui->menuListWidget->currentRow();
-    if (index < 0) return;
-    if (currentMenu->getName() == "SETTINGS" && (index==1 || index== 2)){return;} //handle when user presses select button during BPInterval setting scenario
+    if (index < 0) {return;}
+
+    //handle when user presses select button during BPInterval setting scenario
+    if (currentMenu->getName() == "SETTINGS" && (index==1 || index== 2)){
+        qDebug() << "Please use left/right button to adjust parameters.";
+        return;
+    }
 
     //reset to initial state
     if (currentMenu->getName() == "RESET") {
@@ -394,6 +411,7 @@ void MainWindow::selectAction() {
             currentMenu = new Menu("MAIN MENU", {"START NEW SESSION","HISTORY", "SETTING"}, nullptr);
             mainMenu = currentMenu;
             initializeMenu(currentMenu);
+            qDebug() << "The device has been reset to the initial state.";
             backToMainMenu();
 
             return;
@@ -407,6 +425,7 @@ void MainWindow::selectAction() {
     if (currentMenu->get(index)->getMenuOptions().length() > 0) {
         currentMenu = currentMenu->get(index);
         updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
+        qDebug() << "Enter child menu " + currentMenu->getName();
      //If the menu is not a parent and clicking on it starts a session
     }else if (currentMenu->get(index)->getMenuOptions().length() == 0 && currentMenu->get(index)->getName() == "START NEW SESSION") {
         if (currentBattery <= 10.0) {
@@ -417,6 +436,7 @@ void MainWindow::selectAction() {
         //Update new menu info
         currentMenu = currentMenu->get(index);
         updateMenu("Measuring", {});
+        qDebug() << "Started a new session, sensor is off, HR contact is off.";
         startSession();
     }
     //delete a record
@@ -494,6 +514,7 @@ void MainWindow::backToMainMenu() {
     updateMenu(currentMenu->getName(), currentMenu->getMenuOptions());
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
+    qDebug() << "Back to main menu.";
 }
 
 
@@ -518,6 +539,7 @@ void MainWindow::backToPrevious() {
 
     ui->stackedWidget->setVisible(false);
     ui->contact->setVisible(false);
+    qDebug() << "Back to previous menu.";
 }
 
 
@@ -540,6 +562,7 @@ void MainWindow::parameterPlus() {
             ui->menuListWidget->setCurrentRow(1);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
+            qDebug() << "BP Interval has increased to " + (QString::number(setting->getBpInterval()));
         }else if (index == 2 && currentChallengeLevel <=3){
             setting->setChallengeLevel(currentChallengeLevel+1);
 
@@ -553,6 +576,9 @@ void MainWindow::parameterPlus() {
             ui->menuListWidget->setCurrentRow(2);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
+            qDebug() << "Challenge level has increased to " + (QString::number(setting->getChallengeLevel()));
+        }else if (currentBpInterval == 30 || currentChallengeLevel == 4){
+            qDebug() << "Breath Pacer interval is between 1-30 and challenge level is between 1 and 4.";
         }
     }
 }
@@ -578,6 +604,7 @@ void MainWindow::parameterMinus() {
             ui->menuListWidget->setCurrentRow(1);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
+            qDebug() << "BP Interval has decreased to " + (QString::number(setting->getBpInterval()));
         }else if (index == 2 && currentChallengeLevel >1){
             setting->setChallengeLevel(currentChallengeLevel-1);
 
@@ -591,6 +618,9 @@ void MainWindow::parameterMinus() {
             ui->menuListWidget->setCurrentRow(2);
             ui->menuLabel->setText(currentMenu->getName());
             currentMenu->setMenuOptions(settingList);
+            qDebug() << "Challenge level has decreased to " + (QString::number(setting->getChallengeLevel()));
+        }else if (currentBpInterval == 1 || currentChallengeLevel == 1){
+            qDebug() << "Breath Pacer interval is between 1-30 and challenge level is between 1 and 4.";
         }
     }
 }
