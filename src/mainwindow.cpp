@@ -685,19 +685,13 @@ void MainWindow::activateSensor(bool checked) {
     if (currentTimerCount != -1) {
         if (!sensorOn) {
             currentSession->getTimer()->stop();
-<<<<<<< Updated upstream
+            batteryTimer->start(10000);
             qDebug() << "Sensor is off, HR contact is off. The measurement stops.";
         }
         else {
             currentSession->getTimer()->start(1000);
+            batteryTimer->stop();
             qDebug() << "Sensor is on, HR contact is on. The measurement starts.";
-=======
-            batteryTimer->start(10000);
-        }
-        else {
-            currentSession->getTimer()->start(1000);
-            batteryTimer->stop();;
->>>>>>> Stashed changes
         }
         ui->contact->setVisible(sensorOn);
     }
