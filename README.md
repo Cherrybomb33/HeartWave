@@ -35,6 +35,9 @@
   - Session class
   - Activity diagram
 
+## Demo video:
+- YouTube link: https://youtu.be/i2RBg_o1sh8
+
 ## File Organization:
 - DesignDocumentation
     - SequenceDiagrams
@@ -83,3 +86,10 @@
         - qcustomplot.cpp
         - qcustomplot.h
     - res.qrc
+
+## Excution instruction:
+- After clone (or unzip project zip file if you choose to download the zip file) this project into Qt Creator in course VM, open this project by open comp3004_project.pro file in the root directory. After that, you can run this application.
+- If it takes too long to build the project, you may need to expand the size of memory allocated for your VM. You can do this by following this instruction: Open VirtualBox -> Choose the course VM -> Click <Setting> -> Select <System> tab -> Change size of <Base Memory> -> Press <OK> -> Start VM
+
+## Other notes:
+- You can find all design related documents in /DesignDocumentation directory. /src directory keeps all our source code, and /res directory keeps images used for buttons in UI and library code for generating HRV graph.
