@@ -14,6 +14,7 @@
   - Testing and debugging
   - Traceability matrix
   - UML class diagram
+  - Design patterns
 
 - Maddie Liu:
   - Use Cases
@@ -86,7 +87,7 @@
         - qcustomplot.h
     - res.qrc
 
-## Excution instruction:
+## Execution instruction:
 - After clone (or unzip project zip file if you choose to download the zip file) this project into Qt Creator in course VM, open this project by open comp3004_project.pro file in the root directory. After that, you can run this application.
 - If it takes too long to build the project, you may need to expand the size of memory allocated for your VM. You can do this by following this instruction: Open VirtualBox -> Choose the course VM -> Click 'Setting' -> Select 'System' tab -> Change size of 'Base Memory' -> Press 'OK' -> Start VM and build project
 
