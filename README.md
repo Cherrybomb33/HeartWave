@@ -1,6 +1,10 @@
 # COMP3004 Team 43: HeartWave Project
 
-## Team Members: Jing Wang, Maddie Liu, Hao Li, Daohu Wang
+## Team Members:
+- Jing Wang
+- Maddie Liu
+- Hao Li
+- Daohu Wang
 
 ## Responsibilities:
 - Jing Wang:
