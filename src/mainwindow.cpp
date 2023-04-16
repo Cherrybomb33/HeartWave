@@ -193,20 +193,15 @@ void MainWindow::sessionTimerSlot() {
 void MainWindow::updateSession() {
     //consume battery during the session
     consumeBattery(0.5);
+    if (currentBattery <= 0) {return;}
 
-    //session can only update when battery is above 15%
-    if (currentBattery > 15.0) {
-        //update session data,session vew and HRV graph
-        currentSession->updateAll(setting->getChallengeLevel());
-        updateSessionView();
-        plot();
+    //update session data,session vew and HRV graph
+    currentSession->updateAll(setting->getChallengeLevel());
+    updateSessionView();
+    plot();
 
-        //check if the session has reached its maximum duration and end it if needed
-        if (currentTimerCount >= MAX_SESSION_DURATION) {
-            endSession();
-        }
-    }else {
-        qDebug() << "Battery is under 15%, this session cannot continue, please charge";
+    //check if the session has reached its maximum duration and end it if needed
+    if (currentTimerCount >= MAX_SESSION_DURATION) {
         endSession();
     }
 }
