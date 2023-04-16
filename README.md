@@ -50,7 +50,7 @@
     - UseCases.pdf
     - UML.pdf
     - TraceabilityMatrix.pdf
-    - DesignPattern.pdf
+    - DesignPatterns.pdf
 - README.md
 - comp3004_project.pro
 - mainwindow.ui
