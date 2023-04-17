@@ -768,7 +768,9 @@ void MainWindow::activateSensor(bool checked) {
 //decrease the battery capacity based on the given consumption value
 void MainWindow::consumeBattery(double consumption) {
     changeBatteryCapacity(currentBattery - consumption);
-    if (currentBattery < 15.0 && powerOn) {qDebug("Battery is under 15%, need to be charged");}
+    if (currentBattery < 15.0 && powerOn) {
+        qDebug() << "Battery is under 15%, need to be charged";
+    }
 }
 
 //plot the HRV graph during a session measurement
