@@ -1,43 +1,4 @@
-# COMP3004 Team 43: HeartWave Project
-
-## Team Members:
-- Jing Wang
-- Maddie Liu
-- Hao Li
-- Daohu Wang
-
-## Responsibilities:
-- Jing Wang:
-  - Use Cases
-  - MainWindow class, DBController class, Menu class, Setting class
-  - UI
-  - Testing and debugging
-  - Traceability matrix
-  - UML class diagram
-  - Design patterns
-
-- Maddie Liu:
-  - Use Cases
-  - Record class
-  - Sequence diagrams
-  - Traceability matrix
-
-- Hao Li:
-  - Use Cases
-  - MainWindow class, Session class
-  - UI
-  - Testing and debugging
-  - Sequence diagrams
-  - Video
-
-- Daohu Wang:
-  - Use Cases
-  - Use case diagram
-  - Session class
-  - Activity diagram
-
-## Demo video:
-- YouTube link: https://youtu.be/i2RBg_o1sh8
+# HeartWave Project
 
 ## File Organization:
 - DesignDocumentation
@@ -53,7 +14,7 @@
     - TraceabilityMatrix.pdf
     - DesignPatterns.pdf
 - README.md
-- comp3004_project.pro
+- heartwave.pro
 - mainwindow.ui
 - src
     - main.cpp
@@ -88,9 +49,4 @@
     - res.qrc
 
 ## Execution instruction:
-- After clone (or unzip project zip file if you choose to download the zip file) this project into Qt Creator in course VM, open this project by open comp3004_project.pro file in the root directory. After that, you can run this application.
-- If it takes too long to build the project, you may need to expand the size of memory allocated for your VM. You can do this by following this instruction: Open VirtualBox -> Choose the course VM -> Click 'Setting' -> Select 'System' tab -> Change size of 'Base Memory' -> Press 'OK' -> Start VM and build project
-
-## Other notes:
-- You can find all design related documents in /DesignDocumentation directory. /src directory keeps all our source code, and /res directory keeps images used for buttons in UI and library code for generating HRV graph.
-- In the development of our project, we have been inspired by the Denas project posted on BrightSpace by professor, we learned a lot and develop our way to implement all requirements.
+- Clone this project and open .pro file in Qt Creator. Run the application and interact with HeartWave device.
